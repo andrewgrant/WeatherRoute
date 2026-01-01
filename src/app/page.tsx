@@ -225,9 +225,9 @@ export default function Home() {
             )}
           </div>
 
-          {/* Time controls */}
+          {/* Time controls - sticky */}
           {routeSteps.length > 0 && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
+            <div className="sticky top-0 z-10 -mx-6 px-6 py-4 mb-6 bg-white border-b border-gray-200 shadow-sm space-y-4">
               {/* Base time picker */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

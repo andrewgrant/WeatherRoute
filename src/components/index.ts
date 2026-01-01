@@ -4,3 +4,5 @@ export { RouteSteps } from "./RouteSteps";
 export { WeatherDisplay, WeatherLoading } from "./WeatherDisplay";
 export { TemperatureToggle } from "./TemperatureToggle";
 export { TimeSlider } from "./TimeSlider";
+export { AlertBadge } from "./AlertBadge";
+export { AddWaypointButton } from "./AddWaypointButton";

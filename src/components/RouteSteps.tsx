@@ -1,15 +1,17 @@
 "use client";
 
-import { MapPin, Navigation, Clock } from "lucide-react";
+import { MapPin, Navigation, Clock, PlusCircle } from "lucide-react";
 import { RouteStep, TemperatureUnit } from "@/lib/types";
 import { formatTimeOffset } from "@/lib/routing";
 import { WeatherDisplay, WeatherLoading } from "./WeatherDisplay";
+import { AlertBadge } from "./AlertBadge";
 
 interface RouteStepsProps {
   steps: RouteStep[];
   isLoading?: boolean;
   isLoadingWeather?: boolean;
   temperatureUnit: TemperatureUnit;
+  departureTime?: Date;
 }
 
 export function RouteSteps({
@@ -17,6 +19,7 @@ export function RouteSteps({
   isLoading = false,
   isLoadingWeather = false,
   temperatureUnit,
+  departureTime,
 }: RouteStepsProps) {
   if (isLoading) {
     return (
@@ -124,6 +127,19 @@ export function RouteSteps({
                     />
                   ) : null}
                 </div>
+
+                {/* Weather Alerts */}
+                {step.alerts && step.alerts.length > 0 && (
+                  <AlertBadge alerts={step.alerts} tripStartTime={departureTime} />
+                )}
+
+                {/* Manual waypoint indicator */}
+                {step.isManualWaypoint && (
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-purple-50 text-purple-600 text-xs rounded-full">
+                    <PlusCircle className="h-3 w-3" />
+                    Added stop
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -140,7 +156,7 @@ export function RouteSteps({
             </span>
           </div>
           <div className="flex items-center justify-between text-sm mt-1">
-            <span className="text-gray-500">Weather stops</span>
+            <span className="text-gray-500">Weather reports</span>
             <span className="font-medium text-gray-700">{steps.length}</span>
           </div>
         </div>

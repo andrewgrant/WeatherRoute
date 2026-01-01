@@ -254,3 +254,21 @@ export function formatTimeOffset(hours: number): string {
   if (m === 0) return `+${h}h`;
   return `+${h}h ${m}m`;
 }
+
+/**
+ * Calculate driving time from origin to a waypoint
+ * Returns time in hours
+ */
+export async function calculateDrivingTime(
+  origin: City,
+  waypoint: City
+): Promise<number> {
+  const route = await getDirections(origin, waypoint);
+
+  if (!route) {
+    throw new Error("Could not calculate driving time");
+  }
+
+  // Convert seconds to hours, round to 1 decimal place
+  return Math.round((route.duration / 3600) * 10) / 10;
+}

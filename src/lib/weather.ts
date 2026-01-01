@@ -1,6 +1,28 @@
 import { Weather, RouteStep } from "./types";
+import { fetchAlertsForLocation } from "./alerts";
 
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
+
+/**
+ * Sum precipitation values for a window of hours before the target index
+ * @param values Array of hourly precipitation values
+ * @param endIndex The index of the arrival hour
+ * @param windowHours Number of hours to look back
+ * @returns Total precipitation in the window
+ */
+function sumPrecipitation(
+  values: number[],
+  endIndex: number,
+  windowHours: number
+): number {
+  const startIndex = Math.max(0, endIndex - windowHours);
+  let total = 0;
+  for (let i = startIndex; i < endIndex; i++) {
+    total += values[i] || 0;
+  }
+  // Round to 1 decimal place
+  return Math.round(total * 10) / 10;
+}
 
 interface OpenMeteoResponse {
   elevation: number;
@@ -59,6 +81,12 @@ async function fetchWeatherForLocation(
     const snowfall = data.hourly.snowfall[hourIndex];
     const temp = data.hourly.temperature_2m[hourIndex];
 
+    // Calculate accumulated precipitation for 4h and 12h before arrival
+    const accumulatedRain4h = sumPrecipitation(data.hourly.rain, hourIndex, 4);
+    const accumulatedSnow4h = sumPrecipitation(data.hourly.snowfall, hourIndex, 4);
+    const accumulatedRain12h = sumPrecipitation(data.hourly.rain, hourIndex, 12);
+    const accumulatedSnow12h = sumPrecipitation(data.hourly.snowfall, hourIndex, 12);
+
     // Calculate rain vs snow probability based on precipitation type
     // If there's snowfall, attribute probability to snow; otherwise to rain
     let rainProbability = 0;
@@ -93,6 +121,10 @@ async function fetchWeatherForLocation(
       snowProbability,
       windSpeed: data.hourly.wind_speed_10m[hourIndex],
       elevation: data.elevation,
+      accumulatedRain4h,
+      accumulatedSnow4h,
+      accumulatedRain12h,
+      accumulatedSnow12h,
     };
   } catch (error) {
     console.error("Error fetching weather:", error);
@@ -113,16 +145,24 @@ export async function fetchWeatherForRoute(
         startTime.getTime() + step.timeOffset * 60 * 60 * 1000
       );
 
-      const weather = await fetchWeatherForLocation(
-        step.city.coordinates.lat,
-        step.city.coordinates.lng,
-        arrivalTime
-      );
+      // Fetch weather and alerts in parallel
+      const [weather, alerts] = await Promise.all([
+        fetchWeatherForLocation(
+          step.city.coordinates.lat,
+          step.city.coordinates.lng,
+          arrivalTime
+        ),
+        fetchAlertsForLocation(
+          step.city.coordinates.lat,
+          step.city.coordinates.lng
+        ),
+      ]);
 
       return {
         ...step,
         arrivalTime,
         weather: weather || undefined,
+        alerts: alerts.length > 0 ? alerts : undefined,
       };
     })
   );
@@ -253,4 +293,48 @@ export function formatElevation(
     return `${metersToFeet(meters).toLocaleString()} ft`;
   }
   return `${Math.round(meters).toLocaleString()} m`;
+}
+
+/**
+ * Convert mm to inches
+ */
+export function mmToInches(mm: number): number {
+  return Math.round(mm * 0.0393701 * 100) / 100;
+}
+
+/**
+ * Convert cm to inches
+ */
+export function cmToInches(cm: number): number {
+  return Math.round(cm * 0.393701 * 10) / 10;
+}
+
+/**
+ * Format accumulated rain with unit
+ */
+export function formatRain(
+  mm: number,
+  unit: "celsius" | "fahrenheit"
+): string {
+  if (mm === 0) return "0";
+  if (unit === "fahrenheit") {
+    const inches = mmToInches(mm);
+    return inches < 0.01 ? "<0.01\"" : `${inches}"`;
+  }
+  return `${mm}mm`;
+}
+
+/**
+ * Format accumulated snow with unit
+ */
+export function formatSnow(
+  cm: number,
+  unit: "celsius" | "fahrenheit"
+): string {
+  if (cm === 0) return "0";
+  if (unit === "fahrenheit") {
+    const inches = cmToInches(cm);
+    return inches < 0.1 ? "<0.1\"" : `${inches}"`;
+  }
+  return `${cm}cm`;
 }

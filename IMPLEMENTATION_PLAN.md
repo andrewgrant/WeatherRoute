@@ -184,6 +184,180 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 
 ---
 
+## Phase 7: Enhanced Weather Data & Manual Waypoints
+
+**Goal**: Add accumulated precipitation, manual waypoint insertion, NWS alerts, and better defaults
+
+### 7.1: Accumulated Precipitation (4h and 12h before arrival)
+
+**Purpose**: Show road conditions leading up to arrival (wet roads, snow accumulation)
+
+**Files to modify**:
+
+**`src/lib/types.ts`**:
+```typescript
+export interface Weather {
+  // ... existing fields ...
+  accumulatedRain4h: number;   // mm in 4 hours before arrival
+  accumulatedSnow4h: number;   // cm in 4 hours before arrival
+  accumulatedRain12h: number;  // mm in 12 hours before arrival
+  accumulatedSnow12h: number;  // cm in 12 hours before arrival
+}
+```
+
+**`src/lib/weather.ts`**:
+- Modify `fetchWeatherForLocation()` to:
+  - Find the hourIndex for arrival time (already done)
+  - Look back 4 hours and 12 hours from that index
+  - Sum `rain` values for those windows
+  - Sum `snowfall` values for those windows
+  - Handle edge cases (arrival within first 4/12 hours of forecast)
+
+**`src/components/WeatherDisplay.tsx`**:
+- Add section showing accumulated precipitation
+- Format: "Past 4h: 2.5mm rain, 1cm snow"
+- Format: "Past 12h: 8mm rain, 3cm snow"
+- Use appropriate icons (umbrella for rain, snowflake for snow)
+- Consider color coding based on severity
+
+---
+
+### 7.2: Manual Waypoint Insertion
+
+**Purpose**: Allow users to add custom stops that appear at correct time offset
+
+**New files**:
+
+**`src/components/AddWaypointButton.tsx`**:
+- Button that expands to show city autocomplete
+- Uses existing `CityAutocomplete` component
+- "Add Stop" and "Cancel" buttons
+- Compact design that fits below route steps
+
+**Files to modify**:
+
+**`src/lib/routing.ts`**:
+- New function:
+```typescript
+export async function calculateDrivingTime(
+  origin: City,
+  waypoint: City
+): Promise<number> // Returns hours
+```
+- Uses Mapbox Directions API (already integrated)
+- Returns driving time from origin to waypoint
+
+**`src/app/page.tsx`**:
+- New state: `manualWaypoints: RouteStep[]`
+- Function to add waypoint:
+  1. Calculate driving time from origin to waypoint
+  2. Create RouteStep with that timeOffset
+  3. Merge into routeSteps array, sorted by timeOffset
+  4. Fetch weather for new waypoint
+- Mark manual waypoints differently (different icon/style)
+
+**`src/components/RouteSteps.tsx`**:
+- Accept `onAddWaypoint` prop
+- Show AddWaypointButton at bottom of list
+- Distinguish manual waypoints visually (e.g., different icon, "Added" label)
+- Option to remove manual waypoints
+
+---
+
+### 7.3: Default Departure Time (9am Tomorrow)
+
+**Files to modify**:
+
+**`src/app/page.tsx`**:
+- Change initial `baseTime` state:
+```typescript
+const getDefaultDepartureTime = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+  return tomorrow;
+};
+
+const [baseTime, setBaseTime] = useState<Date>(getDefaultDepartureTime);
+```
+
+---
+
+### 7.4: National Weather Service Alerts
+
+**Purpose**: Show active weather warnings for US locations
+
+**API**: `https://api.weather.gov/alerts/active?point={lat},{lon}` (free, no key)
+
+**New files**:
+
+**`src/lib/alerts.ts`**:
+```typescript
+export interface WeatherAlert {
+  id: string;
+  event: string;        // "Winter Storm Warning", "Flood Watch"
+  severity: "Extreme" | "Severe" | "Moderate" | "Minor" | "Unknown";
+  urgency: string;      // "Immediate", "Expected", "Future"
+  headline: string;
+  description: string;
+  instruction: string;
+  expires: Date;
+}
+
+export async function fetchAlertsForLocation(
+  lat: number,
+  lng: number
+): Promise<WeatherAlert[]>
+
+// Check if coordinates are in the US (rough bounding box)
+export function isUSLocation(lat: number, lng: number): boolean
+```
+
+**Files to modify**:
+
+**`src/lib/types.ts`**:
+```typescript
+export interface RouteStep {
+  // ... existing fields ...
+  alerts?: WeatherAlert[];
+}
+```
+
+**`src/lib/weather.ts`**:
+- Import `fetchAlertsForLocation`, `isUSLocation`
+- In `fetchWeatherForRoute()`, also fetch alerts for US locations
+- Skip alerts fetch for non-US locations
+
+**`src/components/WeatherDisplay.tsx`**:
+- Add alert indicator (⚠️ icon with count)
+- Color by severity:
+  - Extreme: red
+  - Severe: orange
+  - Moderate: yellow
+  - Minor: blue
+- Expandable to show alert details
+- Show headline and expiration time
+
+**New component `src/components/AlertBadge.tsx`** (optional):
+- Small badge showing alert count
+- Tooltip or expandable with alert details
+- Accessible (screen reader support)
+
+---
+
+### Implementation Order
+
+1. **Default departure time** (5 min) - Quick win
+2. **Accumulated precipitation** (30 min) - Extends existing weather fetch
+3. **NWS Alerts** (45 min) - New API integration
+4. **Manual waypoints** (1 hr) - Most complex, new UI components
+
+---
+
+**Deliverable**: Enhanced weather data with road conditions, custom waypoints, and severe weather alerts
+
+---
+
 ## Future Enhancements (Not in Initial Scope)
 
 These are noted for later phases:
@@ -192,7 +366,6 @@ These are noted for later phases:
 - [ ] Google Maps as alternative routing provider
 - [ ] Visual map showing route and waypoints
 - [ ] Save favorite routes (would need database)
-- [ ] Weather alerts/warnings along route
 - [ ] Multiple route options (fastest, scenic, etc.)
 - [ ] Offline support / PWA
 - [ ] Historical weather (past date analysis)
@@ -205,6 +378,7 @@ These are noted for later phases:
 |---------|---------------|
 | Mapbox | Sign up at [mapbox.com](https://mapbox.com), get public token from account dashboard |
 | Open-Meteo | None required |
+| NWS Alerts | None required (free public API, US only) |
 
 ---
 

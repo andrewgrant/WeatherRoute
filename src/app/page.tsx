@@ -2,9 +2,9 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { MapPin, AlertCircle } from "lucide-react";
-import { RouteForm, RouteSteps, TemperatureToggle, TimeSlider } from "@/components";
+import { RouteForm, RouteSteps, TemperatureToggle, TimeSlider, AddWaypointButton } from "@/components";
 import { City, RouteStep } from "@/lib/types";
-import { calculateRouteSteps } from "@/lib/routing";
+import { calculateRouteSteps, calculateDrivingTime } from "@/lib/routing";
 import { fetchWeatherForRoute } from "@/lib/weather";
 import { useTemperatureUnit } from "@/lib/useTemperatureUnit";
 
@@ -14,13 +14,24 @@ interface RouteData {
   timeStepHours: number;
 }
 
+/**
+ * Get default departure time: 9am tomorrow
+ */
+function getDefaultDepartureTime(): Date {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+  return tomorrow;
+}
+
 export default function Home() {
   const [routeSteps, setRouteSteps] = useState<RouteStep[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [baseTime, setBaseTime] = useState<Date>(new Date());
+  const [baseTime, setBaseTime] = useState<Date>(getDefaultDepartureTime);
   const [timeOffset, setTimeOffset] = useState(0);
+  const [originCity, setOriginCity] = useState<City | null>(null);
   const { unit: temperatureUnit, setUnit: setTemperatureUnit, isLoaded } = useTemperatureUnit();
 
   // For debouncing weather updates
@@ -32,6 +43,7 @@ export default function Home() {
     setError(null);
     setRouteSteps([]);
     setTimeOffset(0); // Reset offset on new route
+    setOriginCity(data.origin); // Save origin for manual waypoints
 
     try {
       // Calculate route steps
@@ -119,6 +131,40 @@ export default function Home() {
       } finally {
         setIsLoadingWeather(false);
       }
+    }
+  };
+
+  // Handle adding a manual waypoint
+  const handleAddWaypoint = async (city: City) => {
+    if (!originCity) return;
+
+    // Calculate driving time from origin to the new waypoint
+    const drivingTime = await calculateDrivingTime(originCity, city);
+
+    // Create the new step
+    const newStep: RouteStep = {
+      city,
+      timeOffset: drivingTime,
+      isManualWaypoint: true,
+    };
+
+    // Insert the new step at the correct position based on time offset
+    const updatedSteps = [...routeSteps, newStep].sort(
+      (a, b) => a.timeOffset - b.timeOffset
+    );
+
+    setRouteSteps(updatedSteps);
+
+    // Fetch weather for the updated route
+    setIsLoadingWeather(true);
+    try {
+      const startTime = new Date(baseTime.getTime() + timeOffset * 60 * 60 * 1000);
+      const stepsWithWeather = await fetchWeatherForRoute(updatedSteps, startTime);
+      setRouteSteps(stepsWithWeather);
+    } catch (err) {
+      console.error("Failed to fetch weather for new waypoint:", err);
+    } finally {
+      setIsLoadingWeather(false);
     }
   };
 
@@ -211,6 +257,16 @@ export default function Home() {
             isLoadingWeather={isLoadingWeather}
             temperatureUnit={temperatureUnit}
           />
+
+          {/* Add waypoint button */}
+          {routeSteps.length > 0 && originCity && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <AddWaypointButton
+                onAddWaypoint={handleAddWaypoint}
+                disabled={isLoading || isLoadingWeather}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

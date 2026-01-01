@@ -1,9 +1,10 @@
 "use client";
 
-import { MapPin, Navigation, Clock } from "lucide-react";
+import { MapPin, Navigation, Clock, PlusCircle } from "lucide-react";
 import { RouteStep, TemperatureUnit } from "@/lib/types";
 import { formatTimeOffset } from "@/lib/routing";
 import { WeatherDisplay, WeatherLoading } from "./WeatherDisplay";
+import { AlertBadge } from "./AlertBadge";
 
 interface RouteStepsProps {
   steps: RouteStep[];
@@ -124,6 +125,19 @@ export function RouteSteps({
                     />
                   ) : null}
                 </div>
+
+                {/* Weather Alerts */}
+                {step.alerts && step.alerts.length > 0 && (
+                  <AlertBadge alerts={step.alerts} />
+                )}
+
+                {/* Manual waypoint indicator */}
+                {step.isManualWaypoint && (
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-purple-50 text-purple-600 text-xs rounded-full">
+                    <PlusCircle className="h-3 w-3" />
+                    Added stop
+                  </span>
+                )}
               </div>
             </div>
           </div>

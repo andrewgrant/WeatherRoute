@@ -13,6 +13,7 @@ import {
   Snowflake,
   Wind,
   Mountain,
+  Umbrella,
 } from "lucide-react";
 import { Weather, TemperatureUnit } from "@/lib/types";
 import {
@@ -21,6 +22,8 @@ import {
   formatTemperature,
   formatWindSpeed,
   formatElevation,
+  formatRain,
+  formatSnow,
   WeatherCondition,
 } from "@/lib/weather";
 
@@ -141,6 +144,43 @@ export function WeatherDisplay({
             <span>{formatElevation(weather.elevation, unit)}</span>
           </div>
         </div>
+
+        {/* Accumulated precipitation section */}
+        {(weather.accumulatedRain4h > 0 ||
+          weather.accumulatedSnow4h > 0 ||
+          weather.accumulatedRain12h > 0 ||
+          weather.accumulatedSnow12h > 0) && (
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-1 mb-1">
+              <Umbrella className="h-3 w-3 text-gray-400" />
+              <span className="text-xs font-medium text-gray-500">
+                Road Conditions
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-gray-500">
+              <div>
+                <span className="text-gray-400">Past 4h:</span>{" "}
+                <span className="text-blue-500">
+                  {formatRain(weather.accumulatedRain4h, unit)} rain
+                </span>
+                {", "}
+                <span className="text-sky-400">
+                  {formatSnow(weather.accumulatedSnow4h, unit)} snow
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-400">Past 12h:</span>{" "}
+                <span className="text-blue-500">
+                  {formatRain(weather.accumulatedRain12h, unit)} rain
+                </span>
+                {", "}
+                <span className="text-sky-400">
+                  {formatSnow(weather.accumulatedSnow12h, unit)} snow
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

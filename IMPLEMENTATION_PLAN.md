@@ -32,21 +32,22 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 **Goal**: Get a deployable Next.js app with basic structure
 
 **Tasks**:
-- [ ] Initialize Next.js 14+ with App Router
-- [ ] Configure Tailwind CSS
-- [ ] Set up project folder structure:
+- [x] Initialize Next.js 14+ with App Router
+- [x] Configure Tailwind CSS
+- [x] Set up project folder structure:
   ```
-  /app
+  /src
+    /app
     /components
     /lib
-    /api (if needed for proxying)
   ```
-- [ ] Create basic responsive layout shell (header, main content area)
-- [ ] Set up environment variables structure (`.env.example`)
-- [ ] Configure for Vercel deployment
-- [ ] Add basic metadata (title, description)
+- [x] Create basic responsive layout shell (header, main content area)
+- [x] Set up environment variables structure (`.env.example`)
+- [x] Configure for Vercel deployment
+- [x] Add basic metadata (title, description)
+- [x] Install Lucide React for icons
 
-**Deliverable**: Empty app shell deployed to Vercel
+**Deliverable**: Empty app shell deployed to Vercel - **COMPLETE**
 
 ---
 

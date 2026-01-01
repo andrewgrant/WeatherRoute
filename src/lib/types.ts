@@ -29,12 +29,12 @@ export interface Weather {
   rainProbability12hLater: number;
   snowProbability12hLater: number;
   // Accumulated precipitation before arrival
-  accumulatedRain4h: number; // mm in 4 hours before arrival
-  accumulatedSnow4h: number; // cm in 4 hours before arrival
-  accumulatedRain8h: number; // mm in 8 hours before arrival
-  accumulatedSnow8h: number; // cm in 8 hours before arrival
-  accumulatedRain12h: number; // mm in 12 hours before arrival
-  accumulatedSnow12h: number; // cm in 12 hours before arrival
+  accumulatedRain1h: number; // mm in 1 hour before arrival
+  accumulatedSnow1h: number; // cm in 1 hour before arrival
+  accumulatedRain3h: number; // mm in 3 hours before arrival
+  accumulatedSnow3h: number; // cm in 3 hours before arrival
+  accumulatedRain6h: number; // mm in 6 hours before arrival
+  accumulatedSnow6h: number; // cm in 6 hours before arrival
 }
 
 export interface WeatherAlert {

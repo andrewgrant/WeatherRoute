@@ -178,13 +178,13 @@ async function fetchWeatherForLocation(
     const snowfall = data.hourly.snowfall[hourIndex];
     const temp = data.hourly.temperature_2m[hourIndex];
 
-    // Calculate accumulated precipitation for 4h, 8h, and 12h before arrival
-    const accumulatedRain4h = sumPrecipitation(data.hourly.rain, hourIndex, 4);
-    const accumulatedSnow4h = sumPrecipitation(data.hourly.snowfall, hourIndex, 4);
-    const accumulatedRain8h = sumPrecipitation(data.hourly.rain, hourIndex, 8);
-    const accumulatedSnow8h = sumPrecipitation(data.hourly.snowfall, hourIndex, 8);
-    const accumulatedRain12h = sumPrecipitation(data.hourly.rain, hourIndex, 12);
-    const accumulatedSnow12h = sumPrecipitation(data.hourly.snowfall, hourIndex, 12);
+    // Calculate accumulated precipitation for 1h, 3h, and 6h before arrival
+    const accumulatedRain1h = sumPrecipitation(data.hourly.rain, hourIndex, 1);
+    const accumulatedSnow1h = sumPrecipitation(data.hourly.snowfall, hourIndex, 1);
+    const accumulatedRain3h = sumPrecipitation(data.hourly.rain, hourIndex, 3);
+    const accumulatedSnow3h = sumPrecipitation(data.hourly.snowfall, hourIndex, 3);
+    const accumulatedRain6h = sumPrecipitation(data.hourly.rain, hourIndex, 6);
+    const accumulatedSnow6h = sumPrecipitation(data.hourly.snowfall, hourIndex, 6);
 
     // Get earlier precipitation probabilities
     const earlier4h = getEarlierPrecipProb(
@@ -284,12 +284,12 @@ async function fetchWeatherForLocation(
       snowProbability8hLater: later8h.snowProb,
       rainProbability12hLater: later12h.rainProb,
       snowProbability12hLater: later12h.snowProb,
-      accumulatedRain4h,
-      accumulatedSnow4h,
-      accumulatedRain8h,
-      accumulatedSnow8h,
-      accumulatedRain12h,
-      accumulatedSnow12h,
+      accumulatedRain1h,
+      accumulatedSnow1h,
+      accumulatedRain3h,
+      accumulatedSnow3h,
+      accumulatedRain6h,
+      accumulatedSnow6h,
     };
   } catch (error) {
     console.error("Error fetching weather:", error);

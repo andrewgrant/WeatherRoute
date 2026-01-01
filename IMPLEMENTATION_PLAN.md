@@ -56,20 +56,21 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 **Goal**: Working city autocomplete with Mapbox Geocoding
 
 **Tasks**:
-- [ ] Set up Mapbox account and obtain API token
-- [ ] Create reusable `CityAutocomplete` component
-  - Debounced input
+- [x] Set up Mapbox account and obtain API token
+- [x] Create reusable `CityAutocomplete` component
+  - Debounced input (300ms)
   - Dropdown with suggestions
   - Returns city name + coordinates
-- [ ] Create form with:
+  - Keyboard navigation support
+- [x] Create form with:
   - Start city input
   - Destination city input
   - Time step input (hours, number field)
   - "Plan Route" button
-- [ ] Store selected cities in component state
-- [ ] Basic form validation (both cities required, valid time step)
+- [x] Store selected cities in component state
+- [x] Basic form validation (both cities required, valid time step)
 
-**Deliverable**: Form that captures start/end cities with autocomplete
+**Deliverable**: Form that captures start/end cities with autocomplete - **COMPLETE**
 
 ---
 

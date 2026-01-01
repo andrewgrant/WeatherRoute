@@ -1,12 +1,55 @@
 import { City } from "./types";
 
 /**
+ * Waypoint with time offset for URL serialization
+ */
+export interface UrlWaypoint {
+  city: City;
+  timeOffset: number;
+}
+
+/**
  * Serialize a city to a URL-safe string
  * Format: lat,lng|name|fullName
  */
 export function serializeCity(city: City): string {
   const { coordinates, name, fullName } = city;
   return `${coordinates.lat},${coordinates.lng}|${name}|${fullName}`;
+}
+
+/**
+ * Serialize a waypoint (city + time offset)
+ * Format: lat,lng|name|fullName|timeOffset
+ */
+export function serializeWaypoint(waypoint: UrlWaypoint): string {
+  const { city, timeOffset } = waypoint;
+  return `${city.coordinates.lat},${city.coordinates.lng}|${city.name}|${city.fullName}|${timeOffset}`;
+}
+
+/**
+ * Deserialize a waypoint from URL string
+ */
+export function deserializeWaypoint(str: string): UrlWaypoint | null {
+  try {
+    const [coords, name, fullName, offsetStr] = str.split("|");
+    const [lat, lng] = coords.split(",").map(Number);
+    const timeOffset = parseFloat(offsetStr);
+
+    if (isNaN(lat) || isNaN(lng) || !name || !fullName || isNaN(timeOffset)) {
+      return null;
+    }
+
+    return {
+      city: {
+        name,
+        fullName,
+        coordinates: { lat, lng },
+      },
+      timeOffset,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -59,6 +102,7 @@ export interface RouteUrlState {
   departureTime: Date | null;
   timeOffset: number;
   timeStepHours: number;
+  waypoints: UrlWaypoint[];
 }
 
 /**
@@ -70,6 +114,19 @@ export function parseRouteFromUrl(searchParams: URLSearchParams): RouteUrlState 
   const timeStr = searchParams.get("time");
   const offsetStr = searchParams.get("offset");
   const stepStr = searchParams.get("step");
+  const waypointsStr = searchParams.get("waypoints");
+
+  // Parse waypoints (semicolon-separated)
+  const waypoints: UrlWaypoint[] = [];
+  if (waypointsStr) {
+    const waypointStrs = decodeURIComponent(waypointsStr).split(";");
+    for (const wpStr of waypointStrs) {
+      const waypoint = deserializeWaypoint(wpStr);
+      if (waypoint) {
+        waypoints.push(waypoint);
+      }
+    }
+  }
 
   return {
     origin: originStr ? deserializeCity(decodeURIComponent(originStr)) : null,
@@ -77,6 +134,7 @@ export function parseRouteFromUrl(searchParams: URLSearchParams): RouteUrlState 
     departureTime: timeStr ? deserializeDate(timeStr) : null,
     timeOffset: offsetStr ? parseFloat(offsetStr) : 0,
     timeStepHours: stepStr ? parseFloat(stepStr) : 2,
+    waypoints,
   };
 }
 
@@ -89,6 +147,7 @@ export function buildRouteUrl(state: {
   departureTime: Date;
   timeOffset: number;
   timeStepHours: number;
+  waypoints?: UrlWaypoint[];
 }): string {
   const params = new URLSearchParams();
 
@@ -106,6 +165,10 @@ export function buildRouteUrl(state: {
   }
   if (state.timeStepHours !== 2) {
     params.set("step", state.timeStepHours.toString());
+  }
+  if (state.waypoints && state.waypoints.length > 0) {
+    const waypointsStr = state.waypoints.map(serializeWaypoint).join(";");
+    params.set("waypoints", waypointsStr);
   }
 
   const paramString = params.toString();

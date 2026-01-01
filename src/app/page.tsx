@@ -8,7 +8,7 @@ import { City, RouteStep } from "@/lib/types";
 import { calculateRouteSteps, calculateDrivingTime } from "@/lib/routing";
 import { fetchWeatherForRoute } from "@/lib/weather";
 import { useTemperatureUnit } from "@/lib/useTemperatureUnit";
-import { parseRouteFromUrl, buildRouteUrl } from "@/lib/urlState";
+import { parseRouteFromUrl, buildRouteUrl, UrlWaypoint } from "@/lib/urlState";
 
 interface RouteData {
   origin: City;
@@ -72,19 +72,31 @@ function HomeContent() {
   const lastFetchedOffset = useRef<number | null>(null);
   const hasInitializedFromUrl = useRef(false);
 
+  // Extract manual waypoints from route steps
+  const getWaypointsFromSteps = useCallback((steps: RouteStep[]): UrlWaypoint[] => {
+    return steps
+      .filter((step) => step.isManualWaypoint)
+      .map((step) => ({
+        city: step.city,
+        timeOffset: step.timeOffset,
+      }));
+  }, []);
+
   // Update URL with current state
   const updateUrl = useCallback(
-    (origin: City, destination: City, time: Date, offset: number, step: number) => {
+    (origin: City, destination: City, time: Date, offset: number, step: number, steps: RouteStep[]) => {
+      const waypoints = getWaypointsFromSteps(steps);
       const url = buildRouteUrl({
         origin,
         destination,
         departureTime: time,
         timeOffset: offset,
         timeStepHours: step,
+        waypoints,
       });
       router.replace(url, { scroll: false });
     },
-    [router]
+    [router, getWaypointsFromSteps]
   );
 
   const handleRouteSubmit = async (data: RouteData) => {
@@ -96,8 +108,8 @@ function HomeContent() {
     setDestinationCity(data.destination);
     setTimeStepHours(data.timeStepHours);
 
-    // Update URL with route info
-    updateUrl(data.origin, data.destination, baseTime, 0, data.timeStepHours);
+    // Update URL with route info (no waypoints yet for new route)
+    updateUrl(data.origin, data.destination, baseTime, 0, data.timeStepHours, []);
 
     try {
       // Calculate route steps
@@ -166,11 +178,11 @@ function HomeContent() {
 
         // Update URL with new offset
         if (originCity && destinationCity) {
-          updateUrl(originCity, destinationCity, baseTime, newOffset, timeStepHours);
+          updateUrl(originCity, destinationCity, baseTime, newOffset, timeStepHours, routeSteps);
         }
       }
     },
-    [baseTime, routeSteps.length, fetchWeatherDebounced, originCity, destinationCity, timeStepHours, updateUrl]
+    [baseTime, routeSteps, fetchWeatherDebounced, originCity, destinationCity, timeStepHours, updateUrl]
   );
 
   // Handle base time changes from datetime picker
@@ -181,7 +193,7 @@ function HomeContent() {
 
     // Update URL with new time
     if (originCity && destinationCity) {
-      updateUrl(originCity, destinationCity, newBaseTime, 0, timeStepHours);
+      updateUrl(originCity, destinationCity, newBaseTime, 0, timeStepHours, routeSteps);
     }
 
     if (routeSteps.length > 0) {
@@ -200,7 +212,7 @@ function HomeContent() {
 
   // Handle adding a manual waypoint
   const handleAddWaypoint = async (city: City) => {
-    if (!originCity) return;
+    if (!originCity || !destinationCity) return;
 
     // Calculate driving time from origin to the new waypoint
     const drivingTime = await calculateDrivingTime(originCity, city);
@@ -218,6 +230,9 @@ function HomeContent() {
     );
 
     setRouteSteps(updatedSteps);
+
+    // Update URL with new waypoint
+    updateUrl(originCity, destinationCity, baseTime, timeOffset, timeStepHours, updatedSteps);
 
     // Fetch weather for the updated route
     setIsLoadingWeather(true);
@@ -261,7 +276,20 @@ function HomeContent() {
             urlState.destination!,
             urlState.timeStepHours
           );
-          setRouteSteps(steps);
+
+          // Add manual waypoints from URL
+          const waypointSteps: RouteStep[] = urlState.waypoints.map((wp) => ({
+            city: wp.city,
+            timeOffset: wp.timeOffset,
+            isManualWaypoint: true,
+          }));
+
+          // Merge and sort by time offset
+          const allSteps = [...steps, ...waypointSteps].sort(
+            (a, b) => a.timeOffset - b.timeOffset
+          );
+
+          setRouteSteps(allSteps);
           setIsLoading(false);
 
           // Fetch weather
@@ -269,7 +297,7 @@ function HomeContent() {
           const startTime = new Date(
             departureTime.getTime() + urlState.timeOffset * 60 * 60 * 1000
           );
-          const stepsWithWeather = await fetchWeatherForRoute(steps, startTime);
+          const stepsWithWeather = await fetchWeatherForRoute(allSteps, startTime);
           setRouteSteps(stepsWithWeather);
           lastFetchedOffset.current = urlState.timeOffset;
         } catch (err) {

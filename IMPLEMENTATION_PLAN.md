@@ -79,23 +79,25 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 **Goal**: Break a route into time-based waypoints using Mapbox Directions
 
 **Tasks**:
-- [ ] Integrate Mapbox Directions API
+- [x] Integrate Mapbox Directions API
   - Request route between start and destination
-  - Get route geometry (polyline) and total duration
-- [ ] Implement step calculation algorithm:
+  - Get route geometry (GeoJSON) and total duration
+- [x] Implement step calculation algorithm:
   - Given total duration and time step, calculate number of stops
-  - Interpolate points along the route geometry at each time interval
+  - Interpolate points along the route using Haversine distance
   - For each point, reverse geocode to find nearest city/town name
-- [ ] Create `RouteSteps` component to display:
-  - Ordered list of waypoints
-  - City name
-  - Time offset from start (e.g., "+0h", "+2h", "+4h")
-- [ ] Handle edge cases:
-  - Very short routes (fewer steps than expected)
-  - Very long routes (many steps)
+  - Avoid duplicate consecutive cities
+- [x] Create `RouteSteps` component to display:
+  - Ordered list of waypoints with connector lines
+  - City name and full address
+  - Time offset from start (e.g., "Start", "+2h", "+4h 30m")
+  - Journey summary (total time, number of stops)
+- [x] Handle edge cases:
+  - Very short routes (minimum 2 stops: start and end)
   - Time step longer than total journey
+  - Loading and error states
 
-**Deliverable**: List of cities along route with time offsets
+**Deliverable**: List of cities along route with time offsets - **COMPLETE**
 
 ---
 

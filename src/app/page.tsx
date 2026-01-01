@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin } from "lucide-react";
-import { RouteForm } from "@/components";
-import { City } from "@/lib/types";
+import { MapPin, AlertCircle } from "lucide-react";
+import { RouteForm, RouteSteps } from "@/components";
+import { City, RouteStep } from "@/lib/types";
+import { calculateRouteSteps } from "@/lib/routing";
 
 interface RouteData {
   origin: City;
@@ -12,14 +13,29 @@ interface RouteData {
 }
 
 export default function Home() {
-  const [routeData, setRouteData] = useState<RouteData | null>(null);
+  const [routeSteps, setRouteSteps] = useState<RouteStep[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRouteSubmit = async (data: RouteData) => {
     setIsLoading(true);
-    // For now, just store the data - route calculation comes in Phase 3
-    setRouteData(data);
-    setIsLoading(false);
+    setError(null);
+    setRouteSteps([]);
+
+    try {
+      const steps = await calculateRouteSteps(
+        data.origin,
+        data.destination,
+        data.timeStepHours
+      );
+      setRouteSteps(steps);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to calculate route"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,38 +58,27 @@ export default function Home() {
         <RouteForm onSubmit={handleRouteSubmit} isLoading={isLoading} />
       </div>
 
-      {/* Route Preview - shows after form submission */}
-      {routeData && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <h3 className="font-medium text-gray-800 mb-4">Route Preview</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-gray-700">Start</p>
-                <p className="text-gray-500">{routeData.origin.fullName}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-gray-700">Destination</p>
-                <p className="text-gray-500">{routeData.destination.fullName}</p>
-              </div>
-            </div>
-            <div className="pt-2 border-t border-gray-100">
-              <p className="text-gray-500">
-                Weather updates every{" "}
-                <span className="font-medium text-gray-700">
-                  {routeData.timeStepHours} hour
-                  {routeData.timeStepHours !== 1 ? "s" : ""}
-                </span>
-              </p>
-            </div>
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-red-800">Route calculation failed</p>
+            <p className="text-sm text-red-600 mt-1">{error}</p>
           </div>
-          <p className="mt-4 text-xs text-gray-400">
-            Route calculation with waypoints coming in Phase 3
-          </p>
+        </div>
+      )}
+
+      {/* Route Steps - shows while loading or after calculation */}
+      {(isLoading || routeSteps.length > 0) && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+          <h3 className="font-medium text-gray-800 mb-4">Your Route</h3>
+          <RouteSteps steps={routeSteps} isLoading={isLoading} />
+          {routeSteps.length > 0 && (
+            <p className="mt-4 text-xs text-gray-400">
+              Weather forecasts will be added in Phase 4
+            </p>
+          )}
         </div>
       )}
     </div>

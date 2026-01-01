@@ -116,7 +116,7 @@ export function TimeSlider({
             type="range"
             min="-24"
             max="24"
-            step="0.5"
+            step="1"
             value={offsetHours}
             onChange={handleSliderChange}
             disabled={disabled}

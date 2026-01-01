@@ -110,6 +110,13 @@ export function CityAutocomplete({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Update query when value changes externally (e.g., from URL)
+  useEffect(() => {
+    if (value) {
+      setQuery(value.fullName);
+    }
+  }, [value]);
+
   // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
@@ -130,12 +137,15 @@ export function CityAutocomplete({
         </div>
         <input
           ref={inputRef}
-          type="text"
+          type="search"
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => suggestions.length > 0 && setIsOpen(true)}
           placeholder={placeholder}
+          autoComplete="off"
+          data-1p-ignore
+          data-lpignore="true"
           className="block w-full pl-10 pr-10 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
         />
         {isLoading && (

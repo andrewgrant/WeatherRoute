@@ -124,6 +124,7 @@ export function RouteSteps({
                       weather={step.weather}
                       unit={temperatureUnit}
                       compact
+                      arrivalTime={step.arrivalTime}
                     />
                   ) : null}
                 </div>

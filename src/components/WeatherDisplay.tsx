@@ -31,6 +31,7 @@ interface WeatherDisplayProps {
   weather: Weather;
   unit: TemperatureUnit;
   compact?: boolean;
+  arrivalTime?: Date;
 }
 
 const weatherIcons: Record<WeatherCondition, React.ElementType> = {
@@ -55,10 +56,23 @@ const weatherColors: Record<WeatherCondition, string> = {
   thunderstorm: "text-gray-600",
 };
 
+function formatTimeTooltip(baseTime: Date | undefined, offsetHours: number): string {
+  if (!baseTime) return "";
+  const time = new Date(baseTime.getTime() + offsetHours * 60 * 60 * 1000);
+  return time.toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function WeatherDisplay({
   weather,
   unit,
   compact = false,
+  arrivalTime,
 }: WeatherDisplayProps) {
   const condition = getWeatherCondition(weather.weatherCode);
   const description = getWeatherDescription(weather.weatherCode);
@@ -70,7 +84,7 @@ export function WeatherDisplay({
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {/* Temperature and condition */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5" title={description}>
             <Icon className={`h-5 w-5 ${iconColor}`} />
             <span className="font-medium text-gray-800">
               {formatTemperature(weather.temperature, unit)}
@@ -105,7 +119,15 @@ export function WeatherDisplay({
         {/* Earlier predictions */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
           <span className="text-gray-400">Earlier:</span>
-          <span>
+          <span title={formatTimeTooltip(arrivalTime, -2)} className="cursor-help">
+            -2h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature2hEarlier, unit)}</span>
+            {" "}
+            <span className="text-blue-500">{weather.rainProbability2hEarlier}%</span>
+            {" / "}
+            <span className="text-sky-400">{weather.snowProbability2hEarlier}%</span>
+          </span>
+          <span title={formatTimeTooltip(arrivalTime, -4)} className="cursor-help">
             -4h:{" "}
             <span className="text-gray-700">{formatTemperature(weather.temperature4hEarlier, unit)}</span>
             {" "}
@@ -113,7 +135,7 @@ export function WeatherDisplay({
             {" / "}
             <span className="text-sky-400">{weather.snowProbability4hEarlier}%</span>
           </span>
-          <span>
+          <span title={formatTimeTooltip(arrivalTime, -8)} className="cursor-help">
             -8h:{" "}
             <span className="text-gray-700">{formatTemperature(weather.temperature8hEarlier, unit)}</span>
             {" "}
@@ -121,20 +143,20 @@ export function WeatherDisplay({
             {" / "}
             <span className="text-sky-400">{weather.snowProbability8hEarlier}%</span>
           </span>
-          <span>
-            -12h:{" "}
-            <span className="text-gray-700">{formatTemperature(weather.temperature12hEarlier, unit)}</span>
-            {" "}
-            <span className="text-blue-500">{weather.rainProbability12hEarlier}%</span>
-            {" / "}
-            <span className="text-sky-400">{weather.snowProbability12hEarlier}%</span>
-          </span>
         </div>
 
         {/* Later predictions */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
           <span className="text-gray-400">Later:</span>
-          <span>
+          <span title={formatTimeTooltip(arrivalTime, 2)} className="cursor-help">
+            +2h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature2hLater, unit)}</span>
+            {" "}
+            <span className="text-blue-500">{weather.rainProbability2hLater}%</span>
+            {" / "}
+            <span className="text-sky-400">{weather.snowProbability2hLater}%</span>
+          </span>
+          <span title={formatTimeTooltip(arrivalTime, 4)} className="cursor-help">
             +4h:{" "}
             <span className="text-gray-700">{formatTemperature(weather.temperature4hLater, unit)}</span>
             {" "}
@@ -142,21 +164,13 @@ export function WeatherDisplay({
             {" / "}
             <span className="text-sky-400">{weather.snowProbability4hLater}%</span>
           </span>
-          <span>
+          <span title={formatTimeTooltip(arrivalTime, 8)} className="cursor-help">
             +8h:{" "}
             <span className="text-gray-700">{formatTemperature(weather.temperature8hLater, unit)}</span>
             {" "}
             <span className="text-blue-500">{weather.rainProbability8hLater}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability8hLater}%</span>
-          </span>
-          <span>
-            +12h:{" "}
-            <span className="text-gray-700">{formatTemperature(weather.temperature12hLater, unit)}</span>
-            {" "}
-            <span className="text-blue-500">{weather.rainProbability12hLater}%</span>
-            {" / "}
-            <span className="text-sky-400">{weather.snowProbability12hLater}%</span>
           </span>
         </div>
 

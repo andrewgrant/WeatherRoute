@@ -8,6 +8,7 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 |-----------|--------|
 | Framework | Next.js (App Router) |
 | Styling | Tailwind CSS |
+| Icons | Lucide React (minimalist) |
 | Deployment | Vercel |
 | Routing/Geocoding | Mapbox (Directions + Geocoding APIs) |
 | Weather | Open-Meteo (free, no API key) |
@@ -112,7 +113,7 @@ A web app that shows weather forecasts along a driving route, broken into time-b
   - Condition icon (sun, clouds, rain, snow, etc.)
   - Precipitation chance (percentage + icon)
 - [ ] Implement F/C temperature toggle
-  - Store preference in state (later: localStorage)
+  - Store preference in localStorage (persists across sessions)
 - [ ] Map Open-Meteo weather codes to appropriate icons
 - [ ] Add weather source selector (dropdown, currently just Open-Meteo)
   - Structure for future sources
@@ -219,8 +220,29 @@ NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token
 
 ---
 
-## Questions/Decisions for Later
+## Design Decisions
 
-1. Should the F/C preference persist in localStorage?
-2. Icon set preference (custom SVGs, icon library like Lucide, or weather-specific)?
-3. Any specific color scheme or branding?
+| Decision | Choice |
+|----------|--------|
+| F/C Preference | Persist in localStorage |
+| Icons | Lucide (minimalist line icons) |
+| Color Scheme | Light, clean, neutral (see palette below) |
+
+### Color Palette
+
+```
+Background:     #FAFAFA (near white)
+Surface/Cards:  #FFFFFF (white)
+Border:         #E5E7EB (gray-200)
+Text Primary:   #1F2937 (gray-800)
+Text Secondary: #6B7280 (gray-500)
+Accent:         #3B82F6 (blue-500)
+Accent Hover:   #2563EB (blue-600)
+
+Weather Colors:
+  Sunny:        #FBBF24 (amber-400)
+  Cloudy:       #9CA3AF (gray-400)
+  Rain:         #60A5FA (blue-400)
+  Snow:         #E0F2FE (sky-100)
+  Storm:        #4B5563 (gray-600)
+```

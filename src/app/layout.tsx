@@ -21,7 +21,7 @@ export default function RootLayout({
           <header className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               <Link href="/" className="text-xl font-semibold text-gray-800 hover:text-gray-600 transition-colors">
-                WeatherRoute
+                Road Trip Conditions
               </Link>
             </div>
           </header>

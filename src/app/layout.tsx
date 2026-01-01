@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WeatherRoute - Weather Forecasts Along Your Journey",
+  title: "Route Conditions - Weather Forecasts Along Your Journey",
   description:
     "Plan your road trip with weather forecasts at every stop. See predicted conditions along your route based on your departure time.",
   keywords: ["weather", "road trip", "route planner", "forecast", "travel"],
@@ -21,7 +21,7 @@ export default function RootLayout({
           <header className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               <Link href="/" className="text-xl font-semibold text-gray-800 hover:text-gray-600 transition-colors">
-                WeatherRoute
+                Route Conditions
               </Link>
             </div>
           </header>

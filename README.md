@@ -1,4 +1,4 @@
-# WeatherRoute
+# Route Conditions
 
 A web app that shows weather forecasts along a driving route, broken into time-based steps.
 
@@ -49,7 +49,7 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 
 Deploy to Vercel with one click:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andrewgrant/WeatherRoute)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andrewgrant/RouteConditions)
 
 Or connect your GitHub repository to Vercel and it will auto-deploy on push.
 

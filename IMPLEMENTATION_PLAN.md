@@ -1,4 +1,4 @@
-# WeatherRoute - Implementation Plan
+# Route Conditions - Implementation Plan
 
 A web app that shows weather forecasts along a driving route, broken into time-based steps.
 

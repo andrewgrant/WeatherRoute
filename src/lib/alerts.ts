@@ -59,7 +59,7 @@ export async function fetchAlertsForLocation(
 
     const response = await fetch(`${NWS_ALERTS_URL}?${params}`, {
       headers: {
-        "User-Agent": "(WeatherRoute, contact@example.com)",
+        "User-Agent": "(RouteConditions, contact@example.com)",
         Accept: "application/geo+json",
       },
     });

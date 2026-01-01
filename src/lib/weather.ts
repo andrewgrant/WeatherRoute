@@ -3,12 +3,15 @@ import { Weather, RouteStep } from "./types";
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
 
 interface OpenMeteoResponse {
+  elevation: number;
   hourly: {
     time: string[];
     temperature_2m: number[];
     weather_code: number[];
     precipitation_probability: number[];
+    rain: number[];
     snowfall: number[];
+    wind_speed_10m: number[];
   };
 }
 
@@ -24,7 +27,7 @@ async function fetchWeatherForLocation(
     const params = new URLSearchParams({
       latitude: lat.toString(),
       longitude: lng.toString(),
-      hourly: "temperature_2m,weather_code,precipitation_probability,snowfall",
+      hourly: "temperature_2m,weather_code,precipitation_probability,rain,snowfall,wind_speed_10m",
       forecast_days: "16",
       timezone: "auto",
     });
@@ -51,11 +54,45 @@ async function fetchWeatherForLocation(
       return null;
     }
 
+    const precipProb = data.hourly.precipitation_probability[hourIndex];
+    const rain = data.hourly.rain[hourIndex];
+    const snowfall = data.hourly.snowfall[hourIndex];
+    const temp = data.hourly.temperature_2m[hourIndex];
+
+    // Calculate rain vs snow probability based on precipitation type
+    // If there's snowfall, attribute probability to snow; otherwise to rain
+    let rainProbability = 0;
+    let snowProbability = 0;
+
+    if (precipProb > 0) {
+      if (snowfall > 0 && rain === 0) {
+        // Only snow
+        snowProbability = precipProb;
+      } else if (rain > 0 && snowfall === 0) {
+        // Only rain
+        rainProbability = precipProb;
+      } else if (snowfall > 0 && rain > 0) {
+        // Mixed - split based on amounts
+        const total = rain + snowfall;
+        rainProbability = Math.round((rain / total) * precipProb);
+        snowProbability = Math.round((snowfall / total) * precipProb);
+      } else {
+        // No precipitation amounts yet, use temperature to guess
+        if (temp <= 2) {
+          snowProbability = precipProb;
+        } else {
+          rainProbability = precipProb;
+        }
+      }
+    }
+
     return {
-      temperature: data.hourly.temperature_2m[hourIndex],
+      temperature: temp,
       weatherCode: data.hourly.weather_code[hourIndex],
-      precipitationProbability: data.hourly.precipitation_probability[hourIndex],
-      isSnow: data.hourly.snowfall[hourIndex] > 0,
+      rainProbability,
+      snowProbability,
+      windSpeed: data.hourly.wind_speed_10m[hourIndex],
+      elevation: data.elevation,
     };
   } catch (error) {
     console.error("Error fetching weather:", error);
@@ -174,4 +211,46 @@ export function formatTemperature(
     return `${celsiusToFahrenheit(celsius)}°F`;
   }
   return `${Math.round(celsius)}°C`;
+}
+
+/**
+ * Convert km/h to mph
+ */
+export function kmhToMph(kmh: number): number {
+  return Math.round(kmh * 0.621371);
+}
+
+/**
+ * Format wind speed with unit
+ */
+export function formatWindSpeed(
+  kmh: number,
+  unit: "celsius" | "fahrenheit"
+): string {
+  // Use mph for Fahrenheit users, km/h for Celsius users
+  if (unit === "fahrenheit") {
+    return `${kmhToMph(kmh)} mph`;
+  }
+  return `${Math.round(kmh)} km/h`;
+}
+
+/**
+ * Convert meters to feet
+ */
+export function metersToFeet(meters: number): number {
+  return Math.round(meters * 3.28084);
+}
+
+/**
+ * Format elevation with unit
+ */
+export function formatElevation(
+  meters: number,
+  unit: "celsius" | "fahrenheit"
+): string {
+  // Use feet for Fahrenheit users, meters for Celsius users
+  if (unit === "fahrenheit") {
+    return `${metersToFeet(meters).toLocaleString()} ft`;
+  }
+  return `${Math.round(meters).toLocaleString()} m`;
 }

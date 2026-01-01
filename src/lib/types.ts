@@ -10,8 +10,10 @@ export interface City {
 export interface Weather {
   temperature: number; // in Celsius
   weatherCode: number; // WMO weather code
-  precipitationProbability: number; // percentage
-  isSnow: boolean;
+  rainProbability: number; // percentage
+  snowProbability: number; // percentage
+  windSpeed: number; // km/h
+  elevation: number; // meters
 }
 
 export interface RouteStep {

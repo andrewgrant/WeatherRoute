@@ -180,6 +180,14 @@ async function fetchWeatherForLocation(
     const accumulatedSnow4h = sumPrecipitation(data.hourly.snowfall, hourIndex, 4);
 
     // Get earlier weather data (temperature and precipitation)
+    const earlier2h = getEarlierWeather(
+      data.hourly.precipitation_probability,
+      data.hourly.rain,
+      data.hourly.snowfall,
+      data.hourly.temperature_2m,
+      hourIndex,
+      2
+    );
     const earlier4h = getEarlierWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
@@ -196,16 +204,16 @@ async function fetchWeatherForLocation(
       hourIndex,
       8
     );
-    const earlier12h = getEarlierWeather(
+
+    // Get later weather data (temperature and precipitation)
+    const later2h = getLaterWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
       data.hourly.temperature_2m,
       hourIndex,
-      12
+      2
     );
-
-    // Get later weather data (temperature and precipitation)
     const later4h = getLaterWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
@@ -221,14 +229,6 @@ async function fetchWeatherForLocation(
       data.hourly.temperature_2m,
       hourIndex,
       8
-    );
-    const later12h = getLaterWeather(
-      data.hourly.precipitation_probability,
-      data.hourly.rain,
-      data.hourly.snowfall,
-      data.hourly.temperature_2m,
-      hourIndex,
-      12
     );
 
     // Calculate rain vs snow probability based on precipitation type
@@ -265,24 +265,24 @@ async function fetchWeatherForLocation(
       snowProbability,
       windSpeed: data.hourly.wind_speed_10m[hourIndex],
       elevation: data.elevation,
+      temperature2hEarlier: earlier2h.temp,
+      rainProbability2hEarlier: earlier2h.rainProb,
+      snowProbability2hEarlier: earlier2h.snowProb,
       temperature4hEarlier: earlier4h.temp,
       rainProbability4hEarlier: earlier4h.rainProb,
       snowProbability4hEarlier: earlier4h.snowProb,
       temperature8hEarlier: earlier8h.temp,
       rainProbability8hEarlier: earlier8h.rainProb,
       snowProbability8hEarlier: earlier8h.snowProb,
-      temperature12hEarlier: earlier12h.temp,
-      rainProbability12hEarlier: earlier12h.rainProb,
-      snowProbability12hEarlier: earlier12h.snowProb,
+      temperature2hLater: later2h.temp,
+      rainProbability2hLater: later2h.rainProb,
+      snowProbability2hLater: later2h.snowProb,
       temperature4hLater: later4h.temp,
       rainProbability4hLater: later4h.rainProb,
       snowProbability4hLater: later4h.snowProb,
       temperature8hLater: later8h.temp,
       rainProbability8hLater: later8h.rainProb,
       snowProbability8hLater: later8h.snowProb,
-      temperature12hLater: later12h.temp,
-      rainProbability12hLater: later12h.rainProb,
-      snowProbability12hLater: later12h.snowProb,
       accumulatedRain1h,
       accumulatedSnow1h,
       accumulatedRain2h,

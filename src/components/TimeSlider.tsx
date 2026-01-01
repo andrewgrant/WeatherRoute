@@ -31,7 +31,7 @@ export function TimeSlider({
 
   const handleQuickAdjust = useCallback(
     (delta: number) => {
-      const newOffset = Math.max(-24, Math.min(24, offsetHours + delta));
+      const newOffset = Math.max(-36, Math.min(36, offsetHours + delta));
       onChange(newOffset);
     },
     [offsetHours, onChange]
@@ -102,7 +102,7 @@ export function TimeSlider({
         <button
           type="button"
           onClick={() => handleQuickAdjust(-1)}
-          disabled={disabled || offsetHours <= -24}
+          disabled={disabled || offsetHours <= -36}
           className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Subtract 1 hour"
         >
@@ -114,9 +114,9 @@ export function TimeSlider({
           <input
             ref={sliderRef}
             type="range"
-            min="-24"
-            max="24"
-            step="0.5"
+            min="-36"
+            max="36"
+            step="1"
             value={offsetHours}
             onChange={handleSliderChange}
             disabled={disabled}
@@ -146,7 +146,7 @@ export function TimeSlider({
         <button
           type="button"
           onClick={() => handleQuickAdjust(1)}
-          disabled={disabled || offsetHours >= 24}
+          disabled={disabled || offsetHours >= 36}
           className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Add 1 hour"
         >
@@ -156,9 +156,9 @@ export function TimeSlider({
 
       {/* Scale labels */}
       <div className="flex justify-between text-xs text-gray-400 px-8">
-        <span>-24h</span>
+        <span>-36h</span>
         <span>Now</span>
-        <span>+24h</span>
+        <span>+36h</span>
       </div>
     </div>
   );

@@ -106,6 +106,14 @@ export function WeatherDisplay({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
           <span className="text-gray-400">Earlier:</span>
           <span>
+            -2h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature2hEarlier, unit)}</span>
+            {" "}
+            <span className="text-blue-500">{weather.rainProbability2hEarlier}%</span>
+            {" / "}
+            <span className="text-sky-400">{weather.snowProbability2hEarlier}%</span>
+          </span>
+          <span>
             -4h:{" "}
             <span className="text-gray-700">{formatTemperature(weather.temperature4hEarlier, unit)}</span>
             {" "}
@@ -121,19 +129,19 @@ export function WeatherDisplay({
             {" / "}
             <span className="text-sky-400">{weather.snowProbability8hEarlier}%</span>
           </span>
-          <span>
-            -12h:{" "}
-            <span className="text-gray-700">{formatTemperature(weather.temperature12hEarlier, unit)}</span>
-            {" "}
-            <span className="text-blue-500">{weather.rainProbability12hEarlier}%</span>
-            {" / "}
-            <span className="text-sky-400">{weather.snowProbability12hEarlier}%</span>
-          </span>
         </div>
 
         {/* Later predictions */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
           <span className="text-gray-400">Later:</span>
+          <span>
+            +2h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature2hLater, unit)}</span>
+            {" "}
+            <span className="text-blue-500">{weather.rainProbability2hLater}%</span>
+            {" / "}
+            <span className="text-sky-400">{weather.snowProbability2hLater}%</span>
+          </span>
           <span>
             +4h:{" "}
             <span className="text-gray-700">{formatTemperature(weather.temperature4hLater, unit)}</span>
@@ -149,14 +157,6 @@ export function WeatherDisplay({
             <span className="text-blue-500">{weather.rainProbability8hLater}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability8hLater}%</span>
-          </span>
-          <span>
-            +12h:{" "}
-            <span className="text-gray-700">{formatTemperature(weather.temperature12hLater, unit)}</span>
-            {" "}
-            <span className="text-blue-500">{weather.rainProbability12hLater}%</span>
-            {" / "}
-            <span className="text-sky-400">{weather.snowProbability12hLater}%</span>
           </span>
         </div>
 

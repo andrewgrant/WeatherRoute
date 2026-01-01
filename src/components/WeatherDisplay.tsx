@@ -103,29 +103,24 @@ export function WeatherDisplay({
         </div>
 
         {/* Accumulated precipitation - compact version */}
-        {(weather.accumulatedRain4h > 0 ||
-          weather.accumulatedSnow4h > 0 ||
-          weather.accumulatedRain12h > 0 ||
-          weather.accumulatedSnow12h > 0) && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
-            <span className="flex items-center gap-1 text-gray-400">
-              <Umbrella className="h-3 w-3" />
-              Road:
-            </span>
-            <span>
-              4h:{" "}
-              <span className="text-blue-500">{formatRain(weather.accumulatedRain4h, unit)}</span>
-              {" / "}
-              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow4h, unit)}</span>
-            </span>
-            <span>
-              12h:{" "}
-              <span className="text-blue-500">{formatRain(weather.accumulatedRain12h, unit)}</span>
-              {" / "}
-              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow12h, unit)}</span>
-            </span>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
+          <span className="flex items-center gap-1 text-gray-400">
+            <Umbrella className="h-3 w-3" />
+            Road:
+          </span>
+          <span>
+            4h:{" "}
+            <span className="text-blue-500">{formatRain(weather.accumulatedRain4h, unit)}</span>
+            {" / "}
+            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow4h, unit)}</span>
+          </span>
+          <span>
+            12h:{" "}
+            <span className="text-blue-500">{formatRain(weather.accumulatedRain12h, unit)}</span>
+            {" / "}
+            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow12h, unit)}</span>
+          </span>
+        </div>
       </div>
     );
   }

@@ -178,13 +178,13 @@ async function fetchWeatherForLocation(
     const snowfall = data.hourly.snowfall[hourIndex];
     const temp = data.hourly.temperature_2m[hourIndex];
 
-    // Calculate accumulated precipitation for 1h, 3h, and 6h before arrival
+    // Calculate accumulated precipitation for 1h, 2h, and 4h before arrival
     const accumulatedRain1h = sumPrecipitation(data.hourly.rain, hourIndex, 1);
     const accumulatedSnow1h = sumPrecipitation(data.hourly.snowfall, hourIndex, 1);
-    const accumulatedRain3h = sumPrecipitation(data.hourly.rain, hourIndex, 3);
-    const accumulatedSnow3h = sumPrecipitation(data.hourly.snowfall, hourIndex, 3);
-    const accumulatedRain6h = sumPrecipitation(data.hourly.rain, hourIndex, 6);
-    const accumulatedSnow6h = sumPrecipitation(data.hourly.snowfall, hourIndex, 6);
+    const accumulatedRain2h = sumPrecipitation(data.hourly.rain, hourIndex, 2);
+    const accumulatedSnow2h = sumPrecipitation(data.hourly.snowfall, hourIndex, 2);
+    const accumulatedRain4h = sumPrecipitation(data.hourly.rain, hourIndex, 4);
+    const accumulatedSnow4h = sumPrecipitation(data.hourly.snowfall, hourIndex, 4);
 
     // Get earlier precipitation probabilities
     const earlier4h = getEarlierPrecipProb(
@@ -286,10 +286,10 @@ async function fetchWeatherForLocation(
       snowProbability12hLater: later12h.snowProb,
       accumulatedRain1h,
       accumulatedSnow1h,
-      accumulatedRain3h,
-      accumulatedSnow3h,
-      accumulatedRain6h,
-      accumulatedSnow6h,
+      accumulatedRain2h,
+      accumulatedSnow2h,
+      accumulatedRain4h,
+      accumulatedSnow4h,
     };
   } catch (error) {
     console.error("Error fetching weather:", error);
@@ -481,11 +481,12 @@ export function formatRain(
   mm: number,
   unit: "celsius" | "fahrenheit"
 ): string {
-  if (mm === 0) return "0";
   if (unit === "fahrenheit") {
+    if (mm === 0) return "0\"";
     const inches = mmToInches(mm);
     return inches < 0.01 ? "<0.01\"" : `${inches}"`;
   }
+  if (mm === 0) return "0mm";
   return `${mm}mm`;
 }
 
@@ -496,10 +497,11 @@ export function formatSnow(
   cm: number,
   unit: "celsius" | "fahrenheit"
 ): string {
-  if (cm === 0) return "0";
   if (unit === "fahrenheit") {
+    if (cm === 0) return "0\"";
     const inches = cmToInches(cm);
     return inches < 0.1 ? "<0.1\"" : `${inches}"`;
   }
+  if (cm === 0) return "0cm";
   return `${cm}cm`;
 }

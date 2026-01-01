@@ -155,22 +155,22 @@ export function WeatherDisplay({
             Accumulation:
           </span>
           <span>
-            -1h:{" "}
+            1h:{" "}
             <span className="text-blue-500">{formatRain(weather.accumulatedRain1h, unit)}</span>
             {" / "}
             <span className="text-sky-400">{formatSnow(weather.accumulatedSnow1h, unit)}</span>
           </span>
           <span>
-            -3h:{" "}
-            <span className="text-blue-500">{formatRain(weather.accumulatedRain3h, unit)}</span>
+            2h:{" "}
+            <span className="text-blue-500">{formatRain(weather.accumulatedRain2h, unit)}</span>
             {" / "}
-            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow3h, unit)}</span>
+            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow2h, unit)}</span>
           </span>
           <span>
-            -6h:{" "}
-            <span className="text-blue-500">{formatRain(weather.accumulatedRain6h, unit)}</span>
+            4h:{" "}
+            <span className="text-blue-500">{formatRain(weather.accumulatedRain4h, unit)}</span>
             {" / "}
-            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow6h, unit)}</span>
+            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow4h, unit)}</span>
           </span>
         </div>
       </div>
@@ -229,22 +229,22 @@ export function WeatherDisplay({
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-gray-500">
             <div>
-              <span className="text-gray-400">-1h:</span>{" "}
+              <span className="text-gray-400">1h:</span>{" "}
               <span className="text-blue-500">{formatRain(weather.accumulatedRain1h, unit)}</span>
               {" / "}
               <span className="text-sky-400">{formatSnow(weather.accumulatedSnow1h, unit)}</span>
             </div>
             <div>
-              <span className="text-gray-400">-3h:</span>{" "}
-              <span className="text-blue-500">{formatRain(weather.accumulatedRain3h, unit)}</span>
+              <span className="text-gray-400">2h:</span>{" "}
+              <span className="text-blue-500">{formatRain(weather.accumulatedRain2h, unit)}</span>
               {" / "}
-              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow3h, unit)}</span>
+              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow2h, unit)}</span>
             </div>
             <div>
-              <span className="text-gray-400">-6h:</span>{" "}
-              <span className="text-blue-500">{formatRain(weather.accumulatedRain6h, unit)}</span>
+              <span className="text-gray-400">4h:</span>{" "}
+              <span className="text-blue-500">{formatRain(weather.accumulatedRain4h, unit)}</span>
               {" / "}
-              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow6h, unit)}</span>
+              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow4h, unit)}</span>
             </div>
           </div>
         </div>

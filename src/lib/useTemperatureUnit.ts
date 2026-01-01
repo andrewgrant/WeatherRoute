@@ -3,7 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { TemperatureUnit } from "./types";
 
-const STORAGE_KEY = "weatherroute-temp-unit";
+const STORAGE_KEY = "roadtripconditions-temp-unit";
 
 function getSnapshot(): TemperatureUnit {
   const stored = localStorage.getItem(STORAGE_KEY);

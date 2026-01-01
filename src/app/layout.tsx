@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WeatherRoute - Weather Forecasts Along Your Journey",
+  title: "Road Trip Conditions - Weather Forecasts Along Your Journey",
   description:
     "Plan your road trip with weather forecasts at every stop. See predicted conditions along your route based on your departure time.",
   keywords: ["weather", "road trip", "route planner", "forecast", "travel"],

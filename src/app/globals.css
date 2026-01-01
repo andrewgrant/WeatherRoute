@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  /* Color Palette - Light, Clean, Neutral */
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --border: #E5E7EB;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+
+  /* Weather Colors */
+  --weather-sunny: #FBBF24;
+  --weather-cloudy: #9CA3AF;
+  --weather-rain: #60A5FA;
+  --weather-snow: #E0F2FE;
+  --weather-storm: #4B5563;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+}

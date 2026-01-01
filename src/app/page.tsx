@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { MapPin, AlertCircle } from "lucide-react";
 import { RouteForm, RouteSteps, TemperatureToggle, TimeSlider, AddWaypointButton } from "@/components";
 import { City, RouteStep } from "@/lib/types";
 import { calculateRouteSteps, calculateDrivingTime } from "@/lib/routing";
 import { fetchWeatherForRoute } from "@/lib/weather";
 import { useTemperatureUnit } from "@/lib/useTemperatureUnit";
+import { parseRouteFromUrl, buildRouteUrl } from "@/lib/urlState";
 
 interface RouteData {
   origin: City;
@@ -25,6 +27,35 @@ function getDefaultDepartureTime(): Date {
 }
 
 export default function Home() {
+  return (
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeLoading() {
+  return (
+    <div className="space-y-8">
+      <div className="text-center py-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-4">
+          <MapPin className="w-8 h-8 text-blue-500" />
+        </div>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+          Plan Your Weather-Aware Journey
+        </h2>
+        <p className="text-gray-500 max-w-md mx-auto">
+          Loading...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [routeSteps, setRouteSteps] = useState<RouteStep[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
@@ -32,11 +63,29 @@ export default function Home() {
   const [baseTime, setBaseTime] = useState<Date>(getDefaultDepartureTime);
   const [timeOffset, setTimeOffset] = useState(0);
   const [originCity, setOriginCity] = useState<City | null>(null);
+  const [destinationCity, setDestinationCity] = useState<City | null>(null);
+  const [timeStepHours, setTimeStepHours] = useState(2);
   const { unit: temperatureUnit, setUnit: setTemperatureUnit, isLoaded } = useTemperatureUnit();
 
   // For debouncing weather updates
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchedOffset = useRef<number | null>(null);
+  const hasInitializedFromUrl = useRef(false);
+
+  // Update URL with current state
+  const updateUrl = useCallback(
+    (origin: City, destination: City, time: Date, offset: number, step: number) => {
+      const url = buildRouteUrl({
+        origin,
+        destination,
+        departureTime: time,
+        timeOffset: offset,
+        timeStepHours: step,
+      });
+      router.replace(url, { scroll: false });
+    },
+    [router]
+  );
 
   const handleRouteSubmit = async (data: RouteData) => {
     setIsLoading(true);
@@ -44,6 +93,11 @@ export default function Home() {
     setRouteSteps([]);
     setTimeOffset(0); // Reset offset on new route
     setOriginCity(data.origin); // Save origin for manual waypoints
+    setDestinationCity(data.destination);
+    setTimeStepHours(data.timeStepHours);
+
+    // Update URL with route info
+    updateUrl(data.origin, data.destination, baseTime, 0, data.timeStepHours);
 
     try {
       // Calculate route steps
@@ -109,9 +163,14 @@ export default function Home() {
       if (routeSteps.length > 0) {
         const newStartTime = new Date(baseTime.getTime() + newOffset * 60 * 60 * 1000);
         fetchWeatherDebounced(newStartTime, newOffset);
+
+        // Update URL with new offset
+        if (originCity && destinationCity) {
+          updateUrl(originCity, destinationCity, baseTime, newOffset, timeStepHours);
+        }
       }
     },
-    [baseTime, routeSteps.length, fetchWeatherDebounced]
+    [baseTime, routeSteps.length, fetchWeatherDebounced, originCity, destinationCity, timeStepHours, updateUrl]
   );
 
   // Handle base time changes from datetime picker
@@ -119,6 +178,11 @@ export default function Home() {
     setBaseTime(newBaseTime);
     setTimeOffset(0); // Reset offset when base time changes
     lastFetchedOffset.current = null;
+
+    // Update URL with new time
+    if (originCity && destinationCity) {
+      updateUrl(originCity, destinationCity, newBaseTime, 0, timeStepHours);
+    }
 
     if (routeSteps.length > 0) {
       setIsLoadingWeather(true);
@@ -168,6 +232,56 @@ export default function Home() {
     }
   };
 
+  // Initialize from URL params on mount
+  useEffect(() => {
+    if (hasInitializedFromUrl.current) return;
+    hasInitializedFromUrl.current = true;
+
+    const urlState = parseRouteFromUrl(searchParams);
+
+    // Set initial values from URL
+    if (urlState.origin) setOriginCity(urlState.origin);
+    if (urlState.destination) setDestinationCity(urlState.destination);
+    if (urlState.departureTime) setBaseTime(urlState.departureTime);
+    if (urlState.timeOffset) setTimeOffset(urlState.timeOffset);
+    if (urlState.timeStepHours !== 2) setTimeStepHours(urlState.timeStepHours);
+
+    // Auto-submit if we have both origin and destination
+    if (urlState.origin && urlState.destination) {
+      const departureTime = urlState.departureTime || getDefaultDepartureTime();
+
+      // Trigger route calculation
+      (async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+          const steps = await calculateRouteSteps(
+            urlState.origin!,
+            urlState.destination!,
+            urlState.timeStepHours
+          );
+          setRouteSteps(steps);
+          setIsLoading(false);
+
+          // Fetch weather
+          setIsLoadingWeather(true);
+          const startTime = new Date(
+            departureTime.getTime() + urlState.timeOffset * 60 * 60 * 1000
+          );
+          const stepsWithWeather = await fetchWeatherForRoute(steps, startTime);
+          setRouteSteps(stepsWithWeather);
+          lastFetchedOffset.current = urlState.timeOffset;
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to calculate route");
+        } finally {
+          setIsLoading(false);
+          setIsLoadingWeather(false);
+        }
+      })();
+    }
+  }, [searchParams]);
+
   // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
@@ -194,7 +308,13 @@ export default function Home() {
 
       {/* Route Planning Form */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <RouteForm onSubmit={handleRouteSubmit} isLoading={isLoading} />
+        <RouteForm
+          onSubmit={handleRouteSubmit}
+          isLoading={isLoading}
+          initialOrigin={originCity}
+          initialDestination={destinationCity}
+          initialTimeStep={timeStepHours}
+        />
       </div>
 
       {/* Error message */}

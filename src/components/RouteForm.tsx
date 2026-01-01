@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation, Clock, AlertCircle } from "lucide-react";
 import { CityAutocomplete } from "./CityAutocomplete";
 import { City } from "@/lib/types";
@@ -12,6 +12,9 @@ interface RouteFormProps {
     timeStepHours: number;
   }) => void;
   isLoading?: boolean;
+  initialOrigin?: City | null;
+  initialDestination?: City | null;
+  initialTimeStep?: number;
 }
 
 interface FormErrors {
@@ -20,11 +23,30 @@ interface FormErrors {
   timeStep?: string;
 }
 
-export function RouteForm({ onSubmit, isLoading = false }: RouteFormProps) {
-  const [origin, setOrigin] = useState<City | null>(null);
-  const [destination, setDestination] = useState<City | null>(null);
-  const [timeStepHours, setTimeStepHours] = useState<string>("2");
+export function RouteForm({
+  onSubmit,
+  isLoading = false,
+  initialOrigin = null,
+  initialDestination = null,
+  initialTimeStep = 2,
+}: RouteFormProps) {
+  const [origin, setOrigin] = useState<City | null>(initialOrigin);
+  const [destination, setDestination] = useState<City | null>(initialDestination);
+  const [timeStepHours, setTimeStepHours] = useState<string>(initialTimeStep.toString());
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Update state when initial values change (from URL)
+  useEffect(() => {
+    if (initialOrigin) setOrigin(initialOrigin);
+  }, [initialOrigin]);
+
+  useEffect(() => {
+    if (initialDestination) setDestination(initialDestination);
+  }, [initialDestination]);
+
+  useEffect(() => {
+    if (initialTimeStep !== 2) setTimeStepHours(initialTimeStep.toString());
+  }, [initialTimeStep]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};

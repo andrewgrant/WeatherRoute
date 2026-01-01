@@ -17,15 +17,24 @@ export interface Weather {
   // Earlier predictions (probability at hours before arrival)
   rainProbability4hEarlier: number;
   snowProbability4hEarlier: number;
+  rainProbability8hEarlier: number;
+  snowProbability8hEarlier: number;
   rainProbability12hEarlier: number;
   snowProbability12hEarlier: number;
+  // Later predictions (probability at hours after arrival)
+  rainProbability4hLater: number;
+  snowProbability4hLater: number;
+  rainProbability8hLater: number;
+  snowProbability8hLater: number;
+  rainProbability12hLater: number;
+  snowProbability12hLater: number;
   // Accumulated precipitation before arrival
   accumulatedRain4h: number; // mm in 4 hours before arrival
   accumulatedSnow4h: number; // cm in 4 hours before arrival
+  accumulatedRain8h: number; // mm in 8 hours before arrival
+  accumulatedSnow8h: number; // cm in 8 hours before arrival
   accumulatedRain12h: number; // mm in 12 hours before arrival
   accumulatedSnow12h: number; // cm in 12 hours before arrival
-  accumulatedRain24h: number; // mm in 24 hours before arrival
-  accumulatedSnow24h: number; // cm in 24 hours before arrival
 }
 
 export interface WeatherAlert {

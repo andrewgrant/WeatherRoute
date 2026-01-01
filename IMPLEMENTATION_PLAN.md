@@ -133,22 +133,25 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 **Goal**: Control departure time with live-updating weather
 
 **Tasks**:
-- [ ] Add date/time picker component
-  - Date selection (calendar)
-  - Time selection (hour/minute)
-  - Default to current date/time
-- [ ] Add ±24 hour slider
-  - Range: -24 to +24 hours from selected date/time
+- [x] Add date/time picker component
+  - Native datetime-local input
+  - Defaults to current date/time
+  - Resets slider offset when changed
+- [x] Add ±24 hour slider (TimeSlider component)
+  - Range: -24 to +24 hours with 30-min steps
   - Updates weather in real-time as user drags
-  - Show current offset value
-- [ ] Optimize for live updates:
-  - Debounce or throttle API calls during drag
-  - Cache weather data where possible
-  - Loading states that don't flash
-- [ ] Recalculate all waypoint weather when time changes
-- [ ] Display effective departure time prominently
+  - Shows current offset (e.g., "+2h", "-30m", "Now")
+  - Quick adjust buttons (±1 hour)
+  - Center marker at "Now" position
+- [x] Optimize for live updates:
+  - 150ms debounce on slider drag
+  - Skip fetches for small offset changes (<15min)
+  - Smooth loading states
+- [x] Recalculate all waypoint weather when time changes
+- [x] Display effective departure time prominently
+  - Shows "Today at 3:00 PM", "Tomorrow at 9:00 AM", etc.
 
-**Deliverable**: Interactive time controls with live weather updates
+**Deliverable**: Interactive time controls with live weather updates - **COMPLETE**
 
 ---
 

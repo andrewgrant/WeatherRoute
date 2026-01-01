@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { MapPin, AlertCircle } from "lucide-react";
-import { RouteForm, RouteSteps, TemperatureToggle } from "@/components";
+import { RouteForm, RouteSteps, TemperatureToggle, TimeSlider } from "@/components";
 import { City, RouteStep } from "@/lib/types";
 import { calculateRouteSteps } from "@/lib/routing";
 import { fetchWeatherForRoute } from "@/lib/weather";
@@ -19,13 +19,19 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [startTime, setStartTime] = useState<Date>(new Date());
+  const [baseTime, setBaseTime] = useState<Date>(new Date());
+  const [timeOffset, setTimeOffset] = useState(0);
   const { unit: temperatureUnit, setUnit: setTemperatureUnit, isLoaded } = useTemperatureUnit();
+
+  // For debouncing weather updates
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFetchedOffset = useRef<number | null>(null);
 
   const handleRouteSubmit = async (data: RouteData) => {
     setIsLoading(true);
     setError(null);
     setRouteSteps([]);
+    setTimeOffset(0); // Reset offset on new route
 
     try {
       // Calculate route steps
@@ -39,8 +45,9 @@ export default function Home() {
 
       // Fetch weather for all steps
       setIsLoadingWeather(true);
-      const stepsWithWeather = await fetchWeatherForRoute(steps, startTime);
+      const stepsWithWeather = await fetchWeatherForRoute(steps, baseTime);
       setRouteSteps(stepsWithWeather);
+      lastFetchedOffset.current = 0;
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to calculate route"
@@ -51,15 +58,62 @@ export default function Home() {
     }
   };
 
-  // Refetch weather when start time changes (if we have steps)
-  const handleStartTimeChange = async (newStartTime: Date) => {
-    setStartTime(newStartTime);
+  // Fetch weather with debouncing for slider changes
+  const fetchWeatherDebounced = useCallback(
+    (newStartTime: Date, newOffset: number) => {
+      // Clear any pending request
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+
+      // Don't fetch if offset hasn't changed enough (avoid duplicate calls)
+      if (lastFetchedOffset.current !== null &&
+          Math.abs(newOffset - lastFetchedOffset.current) < 0.25) {
+        return;
+      }
+
+      setIsLoadingWeather(true);
+
+      debounceRef.current = setTimeout(async () => {
+        try {
+          const stepsWithWeather = await fetchWeatherForRoute(routeSteps, newStartTime);
+          setRouteSteps(stepsWithWeather);
+          lastFetchedOffset.current = newOffset;
+        } catch (err) {
+          console.error("Failed to update weather:", err);
+        } finally {
+          setIsLoadingWeather(false);
+        }
+      }, 150); // 150ms debounce for responsive feel
+    },
+    [routeSteps]
+  );
+
+  // Handle time offset changes from slider
+  const handleTimeOffsetChange = useCallback(
+    (newOffset: number) => {
+      setTimeOffset(newOffset);
+
+      if (routeSteps.length > 0) {
+        const newStartTime = new Date(baseTime.getTime() + newOffset * 60 * 60 * 1000);
+        fetchWeatherDebounced(newStartTime, newOffset);
+      }
+    },
+    [baseTime, routeSteps.length, fetchWeatherDebounced]
+  );
+
+  // Handle base time changes from datetime picker
+  const handleBaseTimeChange = async (newBaseTime: Date) => {
+    setBaseTime(newBaseTime);
+    setTimeOffset(0); // Reset offset when base time changes
+    lastFetchedOffset.current = null;
 
     if (routeSteps.length > 0) {
       setIsLoadingWeather(true);
       try {
-        const stepsWithWeather = await fetchWeatherForRoute(routeSteps, newStartTime);
+        const stepsWithWeather = await fetchWeatherForRoute(routeSteps, newBaseTime);
         setRouteSteps(stepsWithWeather);
+        lastFetchedOffset.current = 0;
       } catch (err) {
         console.error("Failed to update weather:", err);
       } finally {
@@ -67,6 +121,15 @@ export default function Home() {
       }
     }
   };
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -116,21 +179,29 @@ export default function Home() {
             )}
           </div>
 
-          {/* Start time selector */}
+          {/* Time controls */}
           {routeSteps.length > 0 && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Departure Time
-              </label>
-              <input
-                type="datetime-local"
-                value={formatDateTimeLocal(startTime)}
-                onChange={(e) => handleStartTimeChange(new Date(e.target.value))}
-                className="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
+              {/* Base time picker */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Base Departure Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formatDateTimeLocal(baseTime)}
+                  onChange={(e) => handleBaseTimeChange(new Date(e.target.value))}
+                  className="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                />
+              </div>
+
+              {/* Time slider */}
+              <TimeSlider
+                baseTime={baseTime}
+                offsetHours={timeOffset}
+                onChange={handleTimeOffsetChange}
+                disabled={isLoading}
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Weather forecasts will update based on your departure time
-              </p>
             </div>
           )}
 

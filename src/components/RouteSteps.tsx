@@ -156,7 +156,7 @@ export function RouteSteps({
             </span>
           </div>
           <div className="flex items-center justify-between text-sm mt-1">
-            <span className="text-gray-500">Weather stops</span>
+            <span className="text-gray-500">Weather reports</span>
             <span className="font-medium text-gray-700">{steps.length}</span>
           </div>
         </div>

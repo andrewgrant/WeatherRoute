@@ -16,17 +16,10 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Placeholder for route form - Phase 2 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      {/* Route form will be added in Phase 2 */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
         <p className="text-gray-400 text-center text-sm">
-          Route planning form coming in Phase 2
-        </p>
-      </div>
-
-      {/* Placeholder for route steps - Phase 3 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <p className="text-gray-400 text-center text-sm">
-          Route steps with weather will appear here
+          Route planning coming soon
         </p>
       </div>
     </div>

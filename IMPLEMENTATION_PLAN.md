@@ -106,23 +106,25 @@ A web app that shows weather forecasts along a driving route, broken into time-b
 **Goal**: Show weather forecasts for each waypoint at arrival time
 
 **Tasks**:
-- [ ] Integrate Open-Meteo API
+- [x] Integrate Open-Meteo API
   - Fetch hourly forecast for each waypoint's coordinates
-  - Get temperature, weather code, precipitation probability
-- [ ] Create weather data fetching logic:
-  - Batch requests or parallel fetch for all waypoints
-  - Map arrival time to correct forecast hour
-- [ ] Create `WeatherDisplay` component for each step:
-  - Temperature (numeric)
-  - Condition icon (sun, clouds, rain, snow, etc.)
-  - Precipitation chance (percentage + icon)
-- [ ] Implement F/C temperature toggle
-  - Store preference in localStorage (persists across sessions)
-- [ ] Map Open-Meteo weather codes to appropriate icons
-- [ ] Add weather source selector (dropdown, currently just Open-Meteo)
-  - Structure for future sources
+  - Get temperature, weather code, precipitation probability, snowfall
+- [x] Create weather data fetching logic:
+  - Parallel fetch for all waypoints using Promise.all
+  - Map arrival time to correct forecast hour (16-day range)
+- [x] Create `WeatherDisplay` component for each step:
+  - Temperature (numeric with unit)
+  - Condition icon (Lucide icons for sun, clouds, rain, snow, etc.)
+  - Precipitation chance (percentage + rain/snow icon)
+- [x] Implement F/C temperature toggle
+  - Store preference in localStorage using useSyncExternalStore
+  - Cross-tab sync support
+- [x] Map Open-Meteo WMO weather codes to icons and descriptions
+- [x] Add departure time selector
+  - Weather updates based on arrival time at each stop
+  - Shows formatted arrival time for each waypoint
 
-**Deliverable**: Route list with weather data for each stop
+**Deliverable**: Route list with weather data for each stop - **COMPLETE**
 
 ---
 

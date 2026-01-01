@@ -1,15 +1,23 @@
 "use client";
 
 import { MapPin, Navigation, Clock } from "lucide-react";
-import { RouteStep } from "@/lib/types";
+import { RouteStep, TemperatureUnit } from "@/lib/types";
 import { formatTimeOffset } from "@/lib/routing";
+import { WeatherDisplay, WeatherLoading } from "./WeatherDisplay";
 
 interface RouteStepsProps {
   steps: RouteStep[];
   isLoading?: boolean;
+  isLoadingWeather?: boolean;
+  temperatureUnit: TemperatureUnit;
 }
 
-export function RouteSteps({ steps, isLoading = false }: RouteStepsProps) {
+export function RouteSteps({
+  steps,
+  isLoading = false,
+  isLoadingWeather = false,
+  temperatureUnit,
+}: RouteStepsProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -56,7 +64,7 @@ export function RouteSteps({ steps, isLoading = false }: RouteStepsProps) {
             <div className="flex items-start gap-4 py-3">
               {/* Icon */}
               <div
-                className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full ${
+                className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
                   isFirst
                     ? "bg-green-100 text-green-600"
                     : isLast
@@ -71,29 +79,51 @@ export function RouteSteps({ steps, isLoading = false }: RouteStepsProps) {
                 )}
               </div>
 
-              {/* City info */}
+              {/* City info and weather */}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 truncate">
-                  {step.city.name}
-                </p>
-                <p className="text-sm text-gray-500 truncate">
-                  {step.city.fullName}
-                </p>
-              </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-800 truncate">
+                      {step.city.name}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {step.city.fullName}
+                    </p>
+                    {step.arrivalTime && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {formatArrivalTime(step.arrivalTime)}
+                      </p>
+                    )}
+                  </div>
 
-              {/* Time offset */}
-              <div className="flex-shrink-0 text-right">
-                <span
-                  className={`text-sm font-medium ${
-                    isFirst
-                      ? "text-green-600"
-                      : isLast
-                      ? "text-red-600"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {formatTimeOffset(step.timeOffset)}
-                </span>
+                  {/* Time offset */}
+                  <div className="flex-shrink-0 text-right">
+                    <span
+                      className={`text-sm font-medium ${
+                        isFirst
+                          ? "text-green-600"
+                          : isLast
+                          ? "text-red-600"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {formatTimeOffset(step.timeOffset)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Weather */}
+                <div className="mt-2">
+                  {isLoadingWeather ? (
+                    <WeatherLoading compact />
+                  ) : step.weather ? (
+                    <WeatherDisplay
+                      weather={step.weather}
+                      unit={temperatureUnit}
+                      compact
+                    />
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
@@ -126,4 +156,14 @@ function formatTotalTime(hours: number): string {
   if (h === 0) return `${m} min`;
   if (m === 0) return `${h} hr`;
   return `${h} hr ${m} min`;
+}
+
+function formatArrivalTime(date: Date): string {
+  return date.toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }

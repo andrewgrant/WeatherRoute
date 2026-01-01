@@ -7,10 +7,18 @@ export interface City {
   };
 }
 
+export interface Weather {
+  temperature: number; // in Celsius
+  weatherCode: number; // WMO weather code
+  precipitationProbability: number; // percentage
+  isSnow: boolean;
+}
+
 export interface RouteStep {
   city: City;
   timeOffset: number; // hours from start
   arrivalTime?: Date;
+  weather?: Weather;
 }
 
 export interface RouteParams {
@@ -19,3 +27,5 @@ export interface RouteParams {
   timeStepHours: number;
   startTime: Date;
 }
+
+export type TemperatureUnit = "celsius" | "fahrenheit";

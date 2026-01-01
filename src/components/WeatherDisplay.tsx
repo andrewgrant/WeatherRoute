@@ -104,21 +104,27 @@ export function WeatherDisplay({
 
         {/* Earlier predictions */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
-          <span className="text-gray-400">% earlier:</span>
+          <span className="text-gray-400">Earlier:</span>
           <span>
             -4h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature4hEarlier, unit)}</span>
+            {" "}
             <span className="text-blue-500">{weather.rainProbability4hEarlier}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability4hEarlier}%</span>
           </span>
           <span>
             -8h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature8hEarlier, unit)}</span>
+            {" "}
             <span className="text-blue-500">{weather.rainProbability8hEarlier}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability8hEarlier}%</span>
           </span>
           <span>
             -12h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature12hEarlier, unit)}</span>
+            {" "}
             <span className="text-blue-500">{weather.rainProbability12hEarlier}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability12hEarlier}%</span>
@@ -127,21 +133,27 @@ export function WeatherDisplay({
 
         {/* Later predictions */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
-          <span className="text-gray-400">% later:</span>
+          <span className="text-gray-400">Later:</span>
           <span>
             +4h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature4hLater, unit)}</span>
+            {" "}
             <span className="text-blue-500">{weather.rainProbability4hLater}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability4hLater}%</span>
           </span>
           <span>
             +8h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature8hLater, unit)}</span>
+            {" "}
             <span className="text-blue-500">{weather.rainProbability8hLater}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability8hLater}%</span>
           </span>
           <span>
             +12h:{" "}
+            <span className="text-gray-700">{formatTemperature(weather.temperature12hLater, unit)}</span>
+            {" "}
             <span className="text-blue-500">{weather.rainProbability12hLater}%</span>
             {" / "}
             <span className="text-sky-400">{weather.snowProbability12hLater}%</span>

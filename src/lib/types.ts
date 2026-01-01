@@ -14,18 +14,24 @@ export interface Weather {
   snowProbability: number; // percentage
   windSpeed: number; // km/h
   elevation: number; // meters
-  // Earlier predictions (probability at hours before arrival)
+  // Earlier predictions (at hours before arrival)
+  temperature4hEarlier: number;
   rainProbability4hEarlier: number;
   snowProbability4hEarlier: number;
+  temperature8hEarlier: number;
   rainProbability8hEarlier: number;
   snowProbability8hEarlier: number;
+  temperature12hEarlier: number;
   rainProbability12hEarlier: number;
   snowProbability12hEarlier: number;
-  // Later predictions (probability at hours after arrival)
+  // Later predictions (at hours after arrival)
+  temperature4hLater: number;
   rainProbability4hLater: number;
   snowProbability4hLater: number;
+  temperature8hLater: number;
   rainProbability8hLater: number;
   snowProbability8hLater: number;
+  temperature12hLater: number;
   rainProbability12hLater: number;
   snowProbability12hLater: number;
   // Accumulated precipitation before arrival

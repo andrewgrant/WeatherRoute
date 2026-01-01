@@ -25,26 +25,19 @@ function sumPrecipitation(
 }
 
 /**
- * Get precipitation probability at an earlier hour
- * @param precipProbs Array of hourly precipitation probabilities
- * @param rain Array of hourly rain amounts
- * @param snowfall Array of hourly snowfall amounts
- * @param temps Array of hourly temperatures
- * @param hourIndex Current hour index
- * @param hoursBack How many hours to look back
- * @returns Object with rain and snow probability
+ * Get weather data at an earlier hour
  */
-function getEarlierPrecipProb(
+function getEarlierWeather(
   precipProbs: number[],
   rain: number[],
   snowfall: number[],
   temps: number[],
   hourIndex: number,
   hoursBack: number
-): { rainProb: number; snowProb: number } {
+): { temp: number; rainProb: number; snowProb: number } {
   const earlierIndex = hourIndex - hoursBack;
   if (earlierIndex < 0) {
-    return { rainProb: 0, snowProb: 0 };
+    return { temp: 0, rainProb: 0, snowProb: 0 };
   }
 
   const precipProb = precipProbs[earlierIndex] || 0;
@@ -73,23 +66,23 @@ function getEarlierPrecipProb(
     }
   }
 
-  return { rainProb, snowProb };
+  return { temp, rainProb, snowProb };
 }
 
 /**
- * Get precipitation probability at a later hour
+ * Get weather data at a later hour
  */
-function getLaterPrecipProb(
+function getLaterWeather(
   precipProbs: number[],
   rain: number[],
   snowfall: number[],
   temps: number[],
   hourIndex: number,
   hoursForward: number
-): { rainProb: number; snowProb: number } {
+): { temp: number; rainProb: number; snowProb: number } {
   const laterIndex = hourIndex + hoursForward;
   if (laterIndex >= precipProbs.length) {
-    return { rainProb: 0, snowProb: 0 };
+    return { temp: 0, rainProb: 0, snowProb: 0 };
   }
 
   const precipProb = precipProbs[laterIndex] || 0;
@@ -118,7 +111,7 @@ function getLaterPrecipProb(
     }
   }
 
-  return { rainProb, snowProb };
+  return { temp, rainProb, snowProb };
 }
 
 interface OpenMeteoResponse {
@@ -186,8 +179,8 @@ async function fetchWeatherForLocation(
     const accumulatedRain4h = sumPrecipitation(data.hourly.rain, hourIndex, 4);
     const accumulatedSnow4h = sumPrecipitation(data.hourly.snowfall, hourIndex, 4);
 
-    // Get earlier precipitation probabilities
-    const earlier4h = getEarlierPrecipProb(
+    // Get earlier weather data (temperature and precipitation)
+    const earlier4h = getEarlierWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
@@ -195,7 +188,7 @@ async function fetchWeatherForLocation(
       hourIndex,
       4
     );
-    const earlier8h = getEarlierPrecipProb(
+    const earlier8h = getEarlierWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
@@ -203,7 +196,7 @@ async function fetchWeatherForLocation(
       hourIndex,
       8
     );
-    const earlier12h = getEarlierPrecipProb(
+    const earlier12h = getEarlierWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
@@ -212,8 +205,8 @@ async function fetchWeatherForLocation(
       12
     );
 
-    // Get later precipitation probabilities
-    const later4h = getLaterPrecipProb(
+    // Get later weather data (temperature and precipitation)
+    const later4h = getLaterWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
@@ -221,7 +214,7 @@ async function fetchWeatherForLocation(
       hourIndex,
       4
     );
-    const later8h = getLaterPrecipProb(
+    const later8h = getLaterWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
@@ -229,7 +222,7 @@ async function fetchWeatherForLocation(
       hourIndex,
       8
     );
-    const later12h = getLaterPrecipProb(
+    const later12h = getLaterWeather(
       data.hourly.precipitation_probability,
       data.hourly.rain,
       data.hourly.snowfall,
@@ -272,16 +265,22 @@ async function fetchWeatherForLocation(
       snowProbability,
       windSpeed: data.hourly.wind_speed_10m[hourIndex],
       elevation: data.elevation,
+      temperature4hEarlier: earlier4h.temp,
       rainProbability4hEarlier: earlier4h.rainProb,
       snowProbability4hEarlier: earlier4h.snowProb,
+      temperature8hEarlier: earlier8h.temp,
       rainProbability8hEarlier: earlier8h.rainProb,
       snowProbability8hEarlier: earlier8h.snowProb,
+      temperature12hEarlier: earlier12h.temp,
       rainProbability12hEarlier: earlier12h.rainProb,
       snowProbability12hEarlier: earlier12h.snowProb,
+      temperature4hLater: later4h.temp,
       rainProbability4hLater: later4h.rainProb,
       snowProbability4hLater: later4h.snowProb,
+      temperature8hLater: later8h.temp,
       rainProbability8hLater: later8h.rainProb,
       snowProbability8hLater: later8h.snowProb,
+      temperature12hLater: later12h.temp,
       rainProbability12hLater: later12h.rainProb,
       snowProbability12hLater: later12h.snowProb,
       accumulatedRain1h,

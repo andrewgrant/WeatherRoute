@@ -24,6 +24,58 @@ function sumPrecipitation(
   return Math.round(total * 10) / 10;
 }
 
+/**
+ * Get precipitation probability at an earlier hour
+ * @param precipProbs Array of hourly precipitation probabilities
+ * @param rain Array of hourly rain amounts
+ * @param snowfall Array of hourly snowfall amounts
+ * @param temps Array of hourly temperatures
+ * @param hourIndex Current hour index
+ * @param hoursBack How many hours to look back
+ * @returns Object with rain and snow probability
+ */
+function getEarlierPrecipProb(
+  precipProbs: number[],
+  rain: number[],
+  snowfall: number[],
+  temps: number[],
+  hourIndex: number,
+  hoursBack: number
+): { rainProb: number; snowProb: number } {
+  const earlierIndex = hourIndex - hoursBack;
+  if (earlierIndex < 0) {
+    return { rainProb: 0, snowProb: 0 };
+  }
+
+  const precipProb = precipProbs[earlierIndex] || 0;
+  const rainAmt = rain[earlierIndex] || 0;
+  const snowAmt = snowfall[earlierIndex] || 0;
+  const temp = temps[earlierIndex] || 0;
+
+  let rainProb = 0;
+  let snowProb = 0;
+
+  if (precipProb > 0) {
+    if (snowAmt > 0 && rainAmt === 0) {
+      snowProb = precipProb;
+    } else if (rainAmt > 0 && snowAmt === 0) {
+      rainProb = precipProb;
+    } else if (snowAmt > 0 && rainAmt > 0) {
+      const total = rainAmt + snowAmt;
+      rainProb = Math.round((rainAmt / total) * precipProb);
+      snowProb = Math.round((snowAmt / total) * precipProb);
+    } else {
+      if (temp <= 2) {
+        snowProb = precipProb;
+      } else {
+        rainProb = precipProb;
+      }
+    }
+  }
+
+  return { rainProb, snowProb };
+}
+
 interface OpenMeteoResponse {
   elevation: number;
   hourly: {
@@ -81,11 +133,31 @@ async function fetchWeatherForLocation(
     const snowfall = data.hourly.snowfall[hourIndex];
     const temp = data.hourly.temperature_2m[hourIndex];
 
-    // Calculate accumulated precipitation for 4h and 12h before arrival
+    // Calculate accumulated precipitation for 4h, 12h, and 24h before arrival
     const accumulatedRain4h = sumPrecipitation(data.hourly.rain, hourIndex, 4);
     const accumulatedSnow4h = sumPrecipitation(data.hourly.snowfall, hourIndex, 4);
     const accumulatedRain12h = sumPrecipitation(data.hourly.rain, hourIndex, 12);
     const accumulatedSnow12h = sumPrecipitation(data.hourly.snowfall, hourIndex, 12);
+    const accumulatedRain24h = sumPrecipitation(data.hourly.rain, hourIndex, 24);
+    const accumulatedSnow24h = sumPrecipitation(data.hourly.snowfall, hourIndex, 24);
+
+    // Get earlier precipitation probabilities
+    const earlier4h = getEarlierPrecipProb(
+      data.hourly.precipitation_probability,
+      data.hourly.rain,
+      data.hourly.snowfall,
+      data.hourly.temperature_2m,
+      hourIndex,
+      4
+    );
+    const earlier12h = getEarlierPrecipProb(
+      data.hourly.precipitation_probability,
+      data.hourly.rain,
+      data.hourly.snowfall,
+      data.hourly.temperature_2m,
+      hourIndex,
+      12
+    );
 
     // Calculate rain vs snow probability based on precipitation type
     // If there's snowfall, attribute probability to snow; otherwise to rain
@@ -121,10 +193,16 @@ async function fetchWeatherForLocation(
       snowProbability,
       windSpeed: data.hourly.wind_speed_10m[hourIndex],
       elevation: data.elevation,
+      rainProbability4hEarlier: earlier4h.rainProb,
+      snowProbability4hEarlier: earlier4h.snowProb,
+      rainProbability12hEarlier: earlier12h.rainProb,
+      snowProbability12hEarlier: earlier12h.snowProb,
       accumulatedRain4h,
       accumulatedSnow4h,
       accumulatedRain12h,
       accumulatedSnow12h,
+      accumulatedRain24h,
+      accumulatedSnow24h,
     };
   } catch (error) {
     console.error("Error fetching weather:", error);

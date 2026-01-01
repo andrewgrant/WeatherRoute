@@ -102,23 +102,46 @@ export function WeatherDisplay({
           </span>
         </div>
 
-        {/* Accumulated precipitation - compact version */}
+        {/* Earlier predictions */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
+          <span className="text-gray-400">% earlier:</span>
+          <span>
+            -4h:{" "}
+            <span className="text-blue-500">{weather.rainProbability4hEarlier}%</span>
+            {" / "}
+            <span className="text-sky-400">{weather.snowProbability4hEarlier}%</span>
+          </span>
+          <span>
+            -12h:{" "}
+            <span className="text-blue-500">{weather.rainProbability12hEarlier}%</span>
+            {" / "}
+            <span className="text-sky-400">{weather.snowProbability12hEarlier}%</span>
+          </span>
+        </div>
+
+        {/* Accumulated precipitation */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
           <span className="flex items-center gap-1 text-gray-400">
             <Umbrella className="h-3 w-3" />
-            Road:
+            Accumulation:
           </span>
           <span>
-            4h:{" "}
+            -4h:{" "}
             <span className="text-blue-500">{formatRain(weather.accumulatedRain4h, unit)}</span>
             {" / "}
             <span className="text-sky-400">{formatSnow(weather.accumulatedSnow4h, unit)}</span>
           </span>
           <span>
-            12h:{" "}
+            -12h:{" "}
             <span className="text-blue-500">{formatRain(weather.accumulatedRain12h, unit)}</span>
             {" / "}
             <span className="text-sky-400">{formatSnow(weather.accumulatedSnow12h, unit)}</span>
+          </span>
+          <span>
+            -24h:{" "}
+            <span className="text-blue-500">{formatRain(weather.accumulatedRain24h, unit)}</span>
+            {" / "}
+            <span className="text-sky-400">{formatSnow(weather.accumulatedSnow24h, unit)}</span>
           </span>
         </div>
       </div>

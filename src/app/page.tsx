@@ -256,6 +256,7 @@ export default function Home() {
             isLoading={isLoading}
             isLoadingWeather={isLoadingWeather}
             temperatureUnit={temperatureUnit}
+            departureTime={new Date(baseTime.getTime() + timeOffset * 60 * 60 * 1000)}
           />
 
           {/* Add waypoint button */}

@@ -67,38 +67,65 @@ export function WeatherDisplay({
 
   if (compact) {
     return (
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        {/* Temperature and condition */}
-        <div className="flex items-center gap-1.5">
-          <Icon className={`h-5 w-5 ${iconColor}`} />
-          <span className="font-medium text-gray-800">
-            {formatTemperature(weather.temperature, unit)}
+      <div className="space-y-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {/* Temperature and condition */}
+          <div className="flex items-center gap-1.5">
+            <Icon className={`h-5 w-5 ${iconColor}`} />
+            <span className="font-medium text-gray-800">
+              {formatTemperature(weather.temperature, unit)}
+            </span>
+          </div>
+
+          {/* Rain probability */}
+          <span className="flex items-center gap-0.5 text-xs text-blue-500">
+            <Droplets className="h-3 w-3" />
+            {weather.rainProbability}%
+          </span>
+
+          {/* Snow probability */}
+          <span className="flex items-center gap-0.5 text-xs text-sky-400">
+            <Snowflake className="h-3 w-3" />
+            {weather.snowProbability}%
+          </span>
+
+          {/* Wind speed */}
+          <span className="flex items-center gap-0.5 text-xs text-gray-500">
+            <Wind className="h-3 w-3" />
+            {formatWindSpeed(weather.windSpeed, unit)}
+          </span>
+
+          {/* Elevation */}
+          <span className="flex items-center gap-0.5 text-xs text-gray-400">
+            <Mountain className="h-3 w-3" />
+            {formatElevation(weather.elevation, unit)}
           </span>
         </div>
 
-        {/* Rain probability */}
-        <span className="flex items-center gap-0.5 text-xs text-blue-500">
-          <Droplets className="h-3 w-3" />
-          {weather.rainProbability}%
-        </span>
-
-        {/* Snow probability */}
-        <span className="flex items-center gap-0.5 text-xs text-sky-400">
-          <Snowflake className="h-3 w-3" />
-          {weather.snowProbability}%
-        </span>
-
-        {/* Wind speed */}
-        <span className="flex items-center gap-0.5 text-xs text-gray-500">
-          <Wind className="h-3 w-3" />
-          {formatWindSpeed(weather.windSpeed, unit)}
-        </span>
-
-        {/* Elevation */}
-        <span className="flex items-center gap-0.5 text-xs text-gray-400">
-          <Mountain className="h-3 w-3" />
-          {formatElevation(weather.elevation, unit)}
-        </span>
+        {/* Accumulated precipitation - compact version */}
+        {(weather.accumulatedRain4h > 0 ||
+          weather.accumulatedSnow4h > 0 ||
+          weather.accumulatedRain12h > 0 ||
+          weather.accumulatedSnow12h > 0) && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500">
+            <span className="flex items-center gap-1 text-gray-400">
+              <Umbrella className="h-3 w-3" />
+              Road:
+            </span>
+            <span>
+              4h:{" "}
+              <span className="text-blue-500">{formatRain(weather.accumulatedRain4h, unit)}</span>
+              {" / "}
+              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow4h, unit)}</span>
+            </span>
+            <span>
+              12h:{" "}
+              <span className="text-blue-500">{formatRain(weather.accumulatedRain12h, unit)}</span>
+              {" / "}
+              <span className="text-sky-400">{formatSnow(weather.accumulatedSnow12h, unit)}</span>
+            </span>
+          </div>
+        )}
       </div>
     );
   }

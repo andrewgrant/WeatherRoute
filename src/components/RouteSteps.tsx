@@ -11,6 +11,7 @@ interface RouteStepsProps {
   isLoading?: boolean;
   isLoadingWeather?: boolean;
   temperatureUnit: TemperatureUnit;
+  departureTime?: Date;
 }
 
 export function RouteSteps({
@@ -18,6 +19,7 @@ export function RouteSteps({
   isLoading = false,
   isLoadingWeather = false,
   temperatureUnit,
+  departureTime,
 }: RouteStepsProps) {
   if (isLoading) {
     return (
@@ -128,7 +130,7 @@ export function RouteSteps({
 
                 {/* Weather Alerts */}
                 {step.alerts && step.alerts.length > 0 && (
-                  <AlertBadge alerts={step.alerts} />
+                  <AlertBadge alerts={step.alerts} tripStartTime={departureTime} />
                 )}
 
                 {/* Manual waypoint indicator */}

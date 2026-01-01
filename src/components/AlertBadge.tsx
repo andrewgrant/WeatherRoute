@@ -7,15 +7,23 @@ import { getAlertSeverityColor, getAlertIconColor } from "@/lib/alerts";
 
 interface AlertBadgeProps {
   alerts: WeatherAlert[];
+  tripStartTime?: Date;
 }
 
-export function AlertBadge({ alerts }: AlertBadgeProps) {
+export function AlertBadge({ alerts, tripStartTime }: AlertBadgeProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!alerts || alerts.length === 0) return null;
 
+  // Filter alerts: only show those that expire after trip start time
+  const relevantAlerts = tripStartTime
+    ? alerts.filter((alert) => alert.expires > tripStartTime)
+    : alerts;
+
+  if (relevantAlerts.length === 0) return null;
+
   // Get the most severe alert for the badge color
-  const mostSevere = alerts[0];
+  const mostSevere = relevantAlerts[0];
   const iconColor = getAlertIconColor(mostSevere.severity);
 
   return (
@@ -25,11 +33,11 @@ export function AlertBadge({ alerts }: AlertBadgeProps) {
         onClick={() => setIsExpanded(!isExpanded)}
         className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border transition-colors ${getAlertSeverityColor(mostSevere.severity)} hover:opacity-80`}
         aria-expanded={isExpanded}
-        aria-label={`${alerts.length} weather ${alerts.length === 1 ? "alert" : "alerts"}`}
+        aria-label={`${relevantAlerts.length} weather ${relevantAlerts.length === 1 ? "alert" : "alerts"}`}
       >
         <AlertTriangle className={`h-3.5 w-3.5 ${iconColor}`} />
         <span>
-          {alerts.length} {alerts.length === 1 ? "Alert" : "Alerts"}
+          {relevantAlerts.length} {relevantAlerts.length === 1 ? "Alert" : "Alerts"}
         </span>
         {isExpanded ? (
           <ChevronUp className="h-3 w-3" />
@@ -41,7 +49,7 @@ export function AlertBadge({ alerts }: AlertBadgeProps) {
       {/* Expanded alert details */}
       {isExpanded && (
         <div className="mt-2 space-y-2">
-          {alerts.map((alert) => (
+          {relevantAlerts.map((alert) => (
             <AlertCard key={alert.id} alert={alert} />
           ))}
         </div>

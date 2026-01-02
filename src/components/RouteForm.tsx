@@ -9,7 +9,7 @@ interface RouteFormProps {
   onSubmit: (data: {
     origin: City;
     destination: City;
-    timeStepHours: number;
+    timeStepMinutes: number;
   }) => void;
   isLoading?: boolean;
   initialOrigin?: City | null;
@@ -28,11 +28,11 @@ export function RouteForm({
   isLoading = false,
   initialOrigin = null,
   initialDestination = null,
-  initialTimeStep = 2,
+  initialTimeStep = 60,
 }: RouteFormProps) {
   const [origin, setOrigin] = useState<City | null>(initialOrigin);
   const [destination, setDestination] = useState<City | null>(initialDestination);
-  const [timeStepHours, setTimeStepHours] = useState<string>(initialTimeStep.toString());
+  const [timeStepMinutes, setTimeStepMinutes] = useState<string>(initialTimeStep.toString());
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Update state when initial values change (from URL)
@@ -45,7 +45,7 @@ export function RouteForm({
   }, [initialDestination]);
 
   useEffect(() => {
-    if (initialTimeStep !== 2) setTimeStepHours(initialTimeStep.toString());
+    if (initialTimeStep !== 60) setTimeStepMinutes(initialTimeStep.toString());
   }, [initialTimeStep]);
 
   const validateForm = (): boolean => {
@@ -59,9 +59,9 @@ export function RouteForm({
       newErrors.destination = "Please select a destination city";
     }
 
-    const timeStep = parseFloat(timeStepHours);
-    if (isNaN(timeStep) || timeStep < 0.5 || timeStep > 12) {
-      newErrors.timeStep = "Time step must be between 0.5 and 12 hours";
+    const timeStep = parseInt(timeStepMinutes, 10);
+    if (isNaN(timeStep) || timeStep < 15 || timeStep > 480) {
+      newErrors.timeStep = "Time step must be between 15 and 480 minutes";
     }
 
     setErrors(newErrors);
@@ -76,7 +76,7 @@ export function RouteForm({
     onSubmit({
       origin: origin!,
       destination: destination!,
-      timeStepHours: parseFloat(timeStepHours),
+      timeStepMinutes: parseInt(timeStepMinutes, 10),
     });
   };
 
@@ -126,7 +126,7 @@ export function RouteForm({
       {/* Time Step */}
       <div className="sm:max-w-xs">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Time Step (hours)
+          Time Step (minutes)
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -134,12 +134,12 @@ export function RouteForm({
           </div>
           <input
             type="number"
-            min="0.5"
-            max="12"
-            step="0.5"
-            value={timeStepHours}
+            min="15"
+            max="480"
+            step="15"
+            value={timeStepMinutes}
             onChange={(e) => {
-              setTimeStepHours(e.target.value);
+              setTimeStepMinutes(e.target.value);
               if (errors.timeStep)
                 setErrors((err) => ({ ...err, timeStep: undefined }));
             }}

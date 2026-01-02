@@ -13,7 +13,7 @@ import { parseRouteFromUrl, buildRouteUrl, UrlWaypoint } from "@/lib/urlState";
 interface RouteData {
   origin: City;
   destination: City;
-  timeStepHours: number;
+  timeStepMinutes: number;
 }
 
 /**
@@ -64,7 +64,7 @@ function HomeContent() {
   const [timeOffset, setTimeOffset] = useState(0);
   const [originCity, setOriginCity] = useState<City | null>(null);
   const [destinationCity, setDestinationCity] = useState<City | null>(null);
-  const [timeStepHours, setTimeStepHours] = useState(2);
+  const [timeStepMinutes, setTimeStepMinutes] = useState(60);
   const { unit: temperatureUnit, setUnit: setTemperatureUnit, isLoaded } = useTemperatureUnit();
 
   // For debouncing weather updates
@@ -91,7 +91,7 @@ function HomeContent() {
         destination,
         departureTime: time,
         timeOffset: offset,
-        timeStepHours: step,
+        timeStepMinutes: step,
         waypoints,
       });
       router.replace(url, { scroll: false });
@@ -106,17 +106,17 @@ function HomeContent() {
     setTimeOffset(0); // Reset offset on new route
     setOriginCity(data.origin); // Save origin for manual waypoints
     setDestinationCity(data.destination);
-    setTimeStepHours(data.timeStepHours);
+    setTimeStepMinutes(data.timeStepMinutes);
 
     // Update URL with route info (no waypoints yet for new route)
-    updateUrl(data.origin, data.destination, baseTime, 0, data.timeStepHours, []);
+    updateUrl(data.origin, data.destination, baseTime, 0, data.timeStepMinutes, []);
 
     try {
       // Calculate route steps
       const steps = await calculateRouteSteps(
         data.origin,
         data.destination,
-        data.timeStepHours
+        data.timeStepMinutes / 60  // Convert minutes to hours for routing
       );
       setRouteSteps(steps);
       setIsLoading(false);
@@ -178,11 +178,11 @@ function HomeContent() {
 
         // Update URL with new offset
         if (originCity && destinationCity) {
-          updateUrl(originCity, destinationCity, baseTime, newOffset, timeStepHours, routeSteps);
+          updateUrl(originCity, destinationCity, baseTime, newOffset, timeStepMinutes, routeSteps);
         }
       }
     },
-    [baseTime, routeSteps, fetchWeatherDebounced, originCity, destinationCity, timeStepHours, updateUrl]
+    [baseTime, routeSteps, fetchWeatherDebounced, originCity, destinationCity, timeStepMinutes, updateUrl]
   );
 
   // Handle base time changes from datetime picker
@@ -193,7 +193,7 @@ function HomeContent() {
 
     // Update URL with new time
     if (originCity && destinationCity) {
-      updateUrl(originCity, destinationCity, newBaseTime, 0, timeStepHours, routeSteps);
+      updateUrl(originCity, destinationCity, newBaseTime, 0, timeStepMinutes, routeSteps);
     }
 
     if (routeSteps.length > 0) {
@@ -232,7 +232,7 @@ function HomeContent() {
     setRouteSteps(updatedSteps);
 
     // Update URL with new waypoint
-    updateUrl(originCity, destinationCity, baseTime, timeOffset, timeStepHours, updatedSteps);
+    updateUrl(originCity, destinationCity, baseTime, timeOffset, timeStepMinutes, updatedSteps);
 
     // Fetch weather for the updated route
     setIsLoadingWeather(true);
@@ -259,7 +259,7 @@ function HomeContent() {
     if (urlState.destination) setDestinationCity(urlState.destination);
     if (urlState.departureTime) setBaseTime(urlState.departureTime);
     if (urlState.timeOffset) setTimeOffset(urlState.timeOffset);
-    if (urlState.timeStepHours !== 2) setTimeStepHours(urlState.timeStepHours);
+    if (urlState.timeStepMinutes !== 60) setTimeStepMinutes(urlState.timeStepMinutes);
 
     // Auto-submit if we have both origin and destination
     if (urlState.origin && urlState.destination) {
@@ -274,7 +274,7 @@ function HomeContent() {
           const steps = await calculateRouteSteps(
             urlState.origin!,
             urlState.destination!,
-            urlState.timeStepHours
+            urlState.timeStepMinutes / 60  // Convert minutes to hours for routing
           );
 
           // Add manual waypoints from URL
@@ -341,7 +341,7 @@ function HomeContent() {
           isLoading={isLoading}
           initialOrigin={originCity}
           initialDestination={destinationCity}
-          initialTimeStep={timeStepHours}
+          initialTimeStep={timeStepMinutes}
         />
       </div>
 

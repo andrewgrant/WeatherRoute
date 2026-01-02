@@ -101,7 +101,7 @@ export interface RouteUrlState {
   destination: City | null;
   departureTime: Date | null;
   timeOffset: number;
-  timeStepHours: number;
+  timeStepMinutes: number;
   waypoints: UrlWaypoint[];
 }
 
@@ -133,7 +133,7 @@ export function parseRouteFromUrl(searchParams: URLSearchParams): RouteUrlState 
     destination: destStr ? deserializeCity(decodeURIComponent(destStr)) : null,
     departureTime: timeStr ? deserializeDate(timeStr) : null,
     timeOffset: offsetStr ? parseFloat(offsetStr) : 0,
-    timeStepHours: stepStr ? parseFloat(stepStr) : 2,
+    timeStepMinutes: stepStr ? parseInt(stepStr, 10) : 60,
     waypoints,
   };
 }
@@ -146,7 +146,7 @@ export function buildRouteUrl(state: {
   destination: City | null;
   departureTime: Date;
   timeOffset: number;
-  timeStepHours: number;
+  timeStepMinutes: number;
   waypoints?: UrlWaypoint[];
 }): string {
   const params = new URLSearchParams();
@@ -163,8 +163,8 @@ export function buildRouteUrl(state: {
   if (state.timeOffset !== 0) {
     params.set("offset", state.timeOffset.toString());
   }
-  if (state.timeStepHours !== 2) {
-    params.set("step", state.timeStepHours.toString());
+  if (state.timeStepMinutes !== 60) {
+    params.set("step", state.timeStepMinutes.toString());
   }
   if (state.waypoints && state.waypoints.length > 0) {
     const waypointsStr = state.waypoints.map(serializeWaypoint).join(";");
